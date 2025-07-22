@@ -355,6 +355,8 @@ const DashboardPage = () => {
                     onSelect={(range) => setMoodDateRange(range)}
                     className="rounded-md border border-vibe-glass-border"
                     numberOfMonths={2}
+                    disabled={(date) => date > new Date()}
+                    toDate={new Date()}
                   />
                   
                   <div className="flex justify-end space-x-2 pt-2">
