@@ -8,6 +8,8 @@ import Mood from "./pages/Mood";
 import Energy from "./pages/Energy";
 import Complexity from "./pages/Complexity";
 import Satisfaction from "./pages/Satisfaction";
+import Log from "./pages/Log";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/energy" element={<Energy />} />
           <Route path="/complexity" element={<Complexity />} />
           <Route path="/satisfaction" element={<Satisfaction />} />
+          <Route path="/log" element={<Log />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

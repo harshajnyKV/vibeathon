@@ -29,15 +29,20 @@ const Complexity = () => {
   };
 
   return (
-    <div className="min-h-screen grainy-bg relative overflow-hidden">
+    <div className="min-h-screen grainy-bg relative overflow-hidden page-transition">
       {/* Header */}
       <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
         <h1 className="text-3xl font-dancing text-vibe-warm-brown">Vibe</h1>
         <div className="flex gap-4">
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown">
+          <Button 
+            onClick={() => navigate("/dashboard")}
+            variant="ghost" 
+            size="icon" 
+            className="text-vibe-warm-brown hover:text-vibe-glow-orange"
+          >
             <BarChart3 className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown">
+          <Button variant="ghost" size="icon" className="text-vibe-warm-brown hover:text-vibe-glow-orange">
             <User className="h-6 w-6" />
           </Button>
         </div>
@@ -76,14 +81,14 @@ const Complexity = () => {
           </div>
         )}
 
-        {/* Navigation Arrows */}
+        {/* Navigation Arrows - bigger and more visible */}
         <Button
           onClick={handlePrev}
           variant="ghost"
           size="icon"
-          className="absolute left-6 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange"
+          className="absolute left-8 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange w-16 h-16 rounded-full bg-vibe-soft-orange/20 hover:bg-vibe-soft-orange/30"
         >
-          <ChevronLeft className="h-8 w-8" />
+          <ChevronLeft className="h-12 w-12" />
         </Button>
 
         {selectedComplexity !== null && (
@@ -91,9 +96,9 @@ const Complexity = () => {
             onClick={handleNext}
             variant="ghost"
             size="icon"
-            className="absolute right-6 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange animate-pulse"
+            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange animate-pulse w-16 h-16 rounded-full bg-vibe-glow-orange/20"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-12 w-12" />
           </Button>
         )}
       </div>

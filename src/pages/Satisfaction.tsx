@@ -45,22 +45,36 @@ const Satisfaction = () => {
     if (level !== zipLevel && level > 0) {
       setZipLevel(level);
       
-      // Create floating emoji
+      // Create floating emojis - number based on level, both sides
       const currentLevel = satisfactionLevels[level - 1];
       if (currentLevel) {
-        const newEmoji = {
-          id: emojiCounter,
-          emoji: currentLevel.emoji,
-          x: x,
-          y: rect.top + rect.height / 2,
-        };
+        const numEmojis = level; // Number of emojis equals the level
+        const newEmojis = [];
         
-        setFloatingEmojis(prev => [...prev, newEmoji]);
-        setEmojiCounter(prev => prev + 1);
+        for (let i = 0; i < numEmojis; i++) {
+          // Left side emojis
+          newEmojis.push({
+            id: emojiCounter + i,
+            emoji: currentLevel.emoji,
+            x: x - 50 - (i * 30),
+            y: rect.top + rect.height / 2 - (i * 10),
+          });
+          
+          // Right side emojis
+          newEmojis.push({
+            id: emojiCounter + i + numEmojis,
+            emoji: currentLevel.emoji,
+            x: x + 50 + (i * 30),
+            y: rect.top + rect.height / 2 - (i * 10),
+          });
+        }
         
-        // Remove emoji after animation
+        setFloatingEmojis(prev => [...prev, ...newEmojis]);
+        setEmojiCounter(prev => prev + (numEmojis * 2));
+        
+        // Remove emojis after animation
         setTimeout(() => {
-          setFloatingEmojis(prev => prev.filter(emoji => emoji.id !== newEmoji.id));
+          setFloatingEmojis(prev => prev.filter(emoji => !newEmojis.some(newE => newE.id === emoji.id)));
         }, 2000);
       }
     }
@@ -71,8 +85,8 @@ const Satisfaction = () => {
   };
 
   const handleComplete = () => {
-    // Navigate to dashboard or completion page
-    navigate("/");
+    // Navigate to log page
+    navigate("/log");
   };
 
   useEffect(() => {
@@ -87,22 +101,36 @@ const Satisfaction = () => {
         if (level !== zipLevel && level > 0) {
           setZipLevel(level);
           
-          // Create floating emoji
+          // Create floating emojis - number based on level, both sides
           const currentLevel = satisfactionLevels[level - 1];
           if (currentLevel) {
-            const newEmoji = {
-              id: emojiCounter,
-              emoji: currentLevel.emoji,
-              x: x,
-              y: rect.top + rect.height / 2,
-            };
+            const numEmojis = level; // Number of emojis equals the level
+            const newEmojis = [];
             
-            setFloatingEmojis(prev => [...prev, newEmoji]);
-            setEmojiCounter(prev => prev + 1);
+            for (let i = 0; i < numEmojis; i++) {
+              // Left side emojis
+              newEmojis.push({
+                id: emojiCounter + i,
+                emoji: currentLevel.emoji,
+                x: x - 50 - (i * 30),
+                y: rect.top + rect.height / 2 - (i * 10),
+              });
+              
+              // Right side emojis
+              newEmojis.push({
+                id: emojiCounter + i + numEmojis,
+                emoji: currentLevel.emoji,
+                x: x + 50 + (i * 30),
+                y: rect.top + rect.height / 2 - (i * 10),
+              });
+            }
             
-            // Remove emoji after animation
+            setFloatingEmojis(prev => [...prev, ...newEmojis]);
+            setEmojiCounter(prev => prev + (numEmojis * 2));
+            
+            // Remove emojis after animation
             setTimeout(() => {
-              setFloatingEmojis(prev => prev.filter(emoji => emoji.id !== newEmoji.id));
+              setFloatingEmojis(prev => prev.filter(emoji => !newEmojis.some(newE => newE.id === emoji.id)));
             }, 2000);
           }
         }
@@ -121,15 +149,20 @@ const Satisfaction = () => {
   }, [isDragging, zipLevel, emojiCounter]);
 
   return (
-    <div className="min-h-screen grainy-bg relative overflow-hidden">
+    <div className="min-h-screen grainy-bg relative overflow-hidden page-transition">
       {/* Header */}
       <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
         <h1 className="text-3xl font-dancing text-vibe-warm-brown">Vibe</h1>
         <div className="flex gap-4">
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown">
+          <Button 
+            onClick={() => navigate("/dashboard")}
+            variant="ghost" 
+            size="icon" 
+            className="text-vibe-warm-brown hover:text-vibe-glow-orange"
+          >
             <BarChart3 className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown">
+          <Button variant="ghost" size="icon" className="text-vibe-warm-brown hover:text-vibe-glow-orange">
             <User className="h-6 w-6" />
           </Button>
         </div>
@@ -215,14 +248,14 @@ const Satisfaction = () => {
           </Button>
         )}
 
-        {/* Navigation Arrow */}
+        {/* Navigation Arrow - bigger and more visible */}
         <Button
           onClick={handlePrev}
           variant="ghost"
           size="icon"
-          className="absolute left-6 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange"
+          className="absolute left-8 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange w-16 h-16 rounded-full bg-vibe-soft-orange/20 hover:bg-vibe-soft-orange/30"
         >
-          <ChevronLeft className="h-8 w-8" />
+          <ChevronLeft className="h-12 w-12" />
         </Button>
       </div>
 

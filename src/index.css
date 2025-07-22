@@ -122,16 +122,20 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.05) 1px, transparent 0);
-    background-size: 24px 24px;
+      radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.15) 1px, transparent 0),
+      radial-gradient(circle at 3px 3px, hsl(var(--foreground) / 0.08) 0.5px, transparent 0),
+      radial-gradient(circle at 5px 5px, hsl(var(--foreground) / 0.04) 0.8px, transparent 0);
+    background-size: 20px 20px, 8px 8px, 12px 12px;
   }
 
   /* Grainy texture overlay */
   .grainy-bg {
     background-color: hsl(var(--vibe-oatmeal));
     background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.05) 1px, transparent 0);
-    background-size: 24px 24px;
+      radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.15) 1px, transparent 0),
+      radial-gradient(circle at 3px 3px, hsl(var(--foreground) / 0.08) 0.5px, transparent 0),
+      radial-gradient(circle at 5px 5px, hsl(var(--foreground) / 0.04) 0.8px, transparent 0);
+    background-size: 20px 20px, 8px 8px, 12px 12px;
   }
 
   /* Glass morphism effect */
@@ -219,5 +223,32 @@ All colors MUST be HSL.
       opacity: 0;
       transform: translateY(-60px) scale(0.8);
     }
+  }
+
+  /* Page transition animations */
+  @keyframes slideInFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .page-transition {
+    animation: slideInFromRight 0.5s ease-out;
   }
 }

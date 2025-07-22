@@ -35,15 +35,20 @@ const Mood = () => {
   };
 
   return (
-    <div className="min-h-screen grainy-bg relative overflow-hidden">
+    <div className="min-h-screen grainy-bg relative overflow-hidden page-transition">
       {/* Header */}
       <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
         <h1 className="text-3xl font-dancing text-vibe-warm-brown">Vibe</h1>
         <div className="flex gap-4">
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown">
+          <Button 
+            onClick={() => navigate("/dashboard")}
+            variant="ghost" 
+            size="icon" 
+            className="text-vibe-warm-brown hover:text-vibe-glow-orange"
+          >
             <BarChart3 className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown">
+          <Button variant="ghost" size="icon" className="text-vibe-warm-brown hover:text-vibe-glow-orange">
             <User className="h-6 w-6" />
           </Button>
         </div>
@@ -55,33 +60,51 @@ const Mood = () => {
           What is your mood today?
         </h2>
 
-        {/* Mood Semicircle */}
-        <div className="relative w-full max-w-2xl h-64 mb-12">
-          {/* Semicircle background */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 border-4 border-vibe-soft-orange rounded-t-full flex items-end justify-center">
-            {/* Current emoji in center */}
-            <div className="absolute -top-8 text-8xl animate-bounce">
-              {moodEmojis[currentMood].emoji}
-            </div>
+        {/* Mood Semicircle - covers half the page */}
+        <div className="relative w-full h-96 mb-12 overflow-hidden">
+          {/* Full circle container for rotation effect */}
+          <div 
+            className="absolute left-1/2 bottom-0 w-96 h-96 border-8 border-vibe-soft-orange rounded-full transform -translate-x-1/2 translate-y-1/2 transition-transform duration-700 ease-in-out"
+            style={{ 
+              transform: `translateX(-50%) translateY(50%) rotate(${currentMood * 72}deg)`,
+              background: 'linear-gradient(45deg, hsl(var(--vibe-soft-orange) / 0.1), hsl(var(--vibe-glow-orange) / 0.2))'
+            }}
+          >
+            {/* Emoji positions around the circle */}
+            {moodEmojis.map((mood, index) => (
+              <div
+                key={index}
+                className="absolute text-6xl transition-all duration-500"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  transform: `translate(-50%, -50%) rotate(${-index * 72}deg) translateY(-48px) rotate(${index * 72}deg)`,
+                  opacity: index === currentMood ? 1 : 0.3,
+                  scale: index === currentMood ? 1.2 : 0.8,
+                }}
+              >
+                {mood.emoji}
+              </div>
+            ))}
           </div>
 
-          {/* Navigation arrows */}
+          {/* Navigation arrows - bigger and more visible */}
           <Button
             onClick={prevMood}
             variant="ghost"
             size="icon"
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange"
+            className="absolute left-8 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange w-16 h-16 rounded-full bg-vibe-soft-orange/20 hover:bg-vibe-soft-orange/30"
           >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-12 w-12" />
           </Button>
 
           <Button
             onClick={nextMood}
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange"
+            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange w-16 h-16 rounded-full bg-vibe-soft-orange/20 hover:bg-vibe-soft-orange/30"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-12 w-12" />
           </Button>
         </div>
 
@@ -102,15 +125,15 @@ const Mood = () => {
           {selectedMood === currentMood ? '✓ Mood Set' : 'Set Mood'}
         </Button>
 
-        {/* Navigation Arrow */}
+        {/* Navigation Arrow - bigger and more visible */}
         {selectedMood !== null && (
           <Button
             onClick={handleNext}
             variant="ghost"
             size="icon"
-            className="absolute right-6 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange animate-pulse"
+            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange animate-pulse w-16 h-16 rounded-full bg-vibe-glow-orange/20"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-12 w-12" />
           </Button>
         )}
       </div>
