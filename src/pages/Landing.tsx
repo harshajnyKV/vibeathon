@@ -23,12 +23,17 @@ const Landing = () => {
 
   const handleLogin = () => {
     if (email && password) {
-      navigate("/mood");
+      // Check if HR user
+      if (email === "harsha.j@keyvalue.systems") {
+        navigate("/admin");
+      } else {
+        navigate("/mood");
+      }
     }
   };
 
   const handleGoogleLogin = () => {
-    // Simulate Google login
+    // Simulate Google login - redirect to employee dashboard
     navigate("/mood");
   };
 

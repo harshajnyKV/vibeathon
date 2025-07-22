@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BarChart3, User } from "lucide-react";
+import UserSettings from "@/components/UserSettings";
 
 
 const moodEmojis = [
@@ -14,6 +15,7 @@ const moodEmojis = [
 
 const Mood = () => {
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
 
   const handleSetMood = (index: number) => {
@@ -30,7 +32,12 @@ const Mood = () => {
     <div className="min-h-screen grainy-bg relative overflow-hidden page-transition">
       {/* Header */}
       <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
-        <h1 className="text-3xl font-dancing text-vibe-warm-brown">Vibe</h1>
+        <h1 
+          className="text-3xl font-dancing text-vibe-warm-brown cursor-pointer hover:text-vibe-glow-orange transition-colors"
+          onClick={() => navigate("/dashboard")}
+        >
+          Vibe
+        </h1>
         <div className="flex gap-4">
           <Button 
             onClick={() => navigate("/dashboard")}
@@ -40,7 +47,12 @@ const Mood = () => {
           >
             <BarChart3 className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown hover:text-vibe-glow-orange">
+          <Button 
+            onClick={() => setShowSettings(true)}
+            variant="ghost" 
+            size="icon" 
+            className="text-vibe-warm-brown hover:text-vibe-glow-orange"
+          >
             <User className="h-6 w-6" />
           </Button>
         </div>
@@ -88,6 +100,12 @@ const Mood = () => {
           </Button>
         )}
       </div>
+
+      {/* User Settings Modal */}
+      <UserSettings 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
     </div>
   );
 };

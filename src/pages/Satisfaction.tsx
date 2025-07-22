@@ -102,15 +102,15 @@ const SatisfactionPage = () => {
         <div className="flex space-x-4">
           <button
             onClick={goToDashboard}
-            className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
+            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
           >
-            <BarChart3 className="w-6 h-6 text-foreground" />
+            <BarChart3 className="w-6 h-6 text-vibe-warm-brown" />
           </button>
           <button 
             onClick={goToProfile}
-            className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
+            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
           >
-            <User className="w-6 h-6 text-foreground" />
+            <User className="w-6 h-6 text-vibe-warm-brown" />
           </button>
         </div>
       </div>
@@ -215,7 +215,7 @@ const SatisfactionPage = () => {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="font-dancing text-vibe-warm-brown">Drag the zip to rate your satisfaction</p>
+          <p className="text-xl font-dancing text-vibe-warm-brown">Drag the zip to rate your satisfaction</p>
         </div>
       </div>
 
