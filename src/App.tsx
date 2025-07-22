@@ -10,6 +10,7 @@ import Complexity from "./pages/Complexity";
 import Satisfaction from "./pages/Satisfaction";
 import Log from "./pages/Log";
 import Dashboard from "./pages/Dashboard";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/satisfaction" element={<Satisfaction />} />
           <Route path="/log" element={<Log />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

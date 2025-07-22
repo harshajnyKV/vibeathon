@@ -90,12 +90,15 @@ const SatisfactionPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen grainy-bg relative overflow-hidden page-transition">
       {/* Header */}
       <div className="relative z-10 p-6 flex justify-between items-center">
-        <h1 className="text-4xl font-cursive font-bold text-foreground">
+        <button 
+          onClick={goToDashboard}
+          className="text-4xl font-dancing text-vibe-warm-brown hover:text-vibe-glow-orange transition-colors cursor-pointer"
+        >
           Vibe
-        </h1>
+        </button>
         <div className="flex space-x-4">
           <button
             onClick={goToDashboard}
@@ -142,7 +145,7 @@ const SatisfactionPage = () => {
         <motion.h2 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl md:text-6xl font-cursive font-bold text-foreground mb-16 text-center"
+          className="text-5xl md:text-7xl font-dancing text-vibe-warm-brown mb-16 text-center"
         >
           How satisfying was your day?
         </motion.h2>
@@ -150,7 +153,7 @@ const SatisfactionPage = () => {
         {/* Color Slider */}
         <div className="relative w-full max-w-2xl px-8">
           <div className="mb-8">
-            <div className="flex justify-between text-lg font-cursive text-foreground mb-4">
+            <div className="flex justify-between text-lg font-dancing text-vibe-warm-brown mb-4">
               <span className="text-2xl">😭</span>
               <span className="text-2xl">😞</span>
               <span className="text-2xl">👍</span>
@@ -193,10 +196,10 @@ const SatisfactionPage = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              <p className="text-2xl font-cursive text-accent mb-4">
+              <p className="text-2xl font-dancing text-vibe-glow-orange mb-4">
                 Satisfaction: {Math.round(satisfactionRatio * 100)}%
               </p>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg font-dancing text-vibe-warm-brown">
                 {getEmojiForRatio(satisfactionRatio)} 
                 {satisfactionRatio < 0.2 && " Very Unsatisfying"}
                 {satisfactionRatio >= 0.2 && satisfactionRatio < 0.4 && " Somewhat Unsatisfying"}
@@ -204,15 +207,15 @@ const SatisfactionPage = () => {
                 {satisfactionRatio >= 0.6 && satisfactionRatio < 0.8 && " Satisfying"}
                 {satisfactionRatio >= 0.8 && " Extremely Satisfying"}
               </p>
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="text-sm font-dancing text-vibe-soft-orange mt-2">
                 Color: {interpolateColor(satisfactionRatio)}
               </p>
             </motion.div>
           )}
         </div>
 
-        <div className="mt-8 text-center text-muted-foreground">
-          <p className="font-cursive">Drag the zip to rate your satisfaction</p>
+        <div className="mt-8 text-center">
+          <p className="font-dancing text-vibe-warm-brown">Drag the zip to rate your satisfaction</p>
         </div>
       </div>
 
@@ -221,9 +224,9 @@ const SatisfactionPage = () => {
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         onClick={goToPrevPage}
-        className="fixed left-6 top-1/2 transform -translate-y-1/2 z-20 p-6 glass rounded-full hover:bg-accent/20 transition-colors shadow-xl"
+        className="fixed left-6 top-1/2 transform -translate-y-1/2 z-20 p-6 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors shadow-xl"
       >
-        <ChevronLeft className="w-10 h-10 text-foreground" />
+        <ChevronLeft className="w-10 h-10 text-vibe-warm-brown" />
       </motion.button>
 
       {satisfactionRatio > 0 && (
@@ -231,9 +234,9 @@ const SatisfactionPage = () => {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={goToNextPage}
-          className="fixed right-6 top-1/2 transform -translate-y-1/2 z-20 p-6 glass rounded-full hover:bg-accent/20 transition-colors shadow-xl"
+          className="fixed right-6 top-1/2 transform -translate-y-1/2 z-20 p-6 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors shadow-xl"
         >
-          <ChevronRight className="w-10 h-10 text-foreground" />
+          <ChevronRight className="w-10 h-10 text-vibe-warm-brown" />
         </motion.button>
       )}
     </div>
