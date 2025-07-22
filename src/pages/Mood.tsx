@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BarChart3, User } from "lucide-react";
-import { SoundPlayer } from "@/utils/sounds";
+
 
 const moodEmojis = [
   { emoji: "😡", label: "Angry", value: 1 },
@@ -18,8 +18,6 @@ const Mood = () => {
 
   const handleSetMood = (index: number) => {
     setSelectedMood(index);
-    const moodLabel = moodEmojis[index].label.toLowerCase();
-    SoundPlayer.playMoodSound(moodLabel);
   };
 
   const handleNext = () => {

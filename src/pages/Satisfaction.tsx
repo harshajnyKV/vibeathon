@@ -2,8 +2,8 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, BarChart3, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { SoundPlayer } from '@/utils/sounds';
-import BackgroundMusic from '@/components/BackgroundMusic';
+
+
 
 // Theme-based color interpolation function
 const interpolateColor = (ratio: number): string => {
@@ -97,8 +97,7 @@ const SatisfactionPage = () => {
           Vibe
         </h1>
         <div className="flex space-x-4">
-          <BackgroundMusic />
-          <button 
+          <button
             onClick={goToDashboard}
             className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
           >
