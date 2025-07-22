@@ -11,6 +11,9 @@ import Satisfaction from "./pages/Satisfaction";
 import Log from "./pages/Log";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import EmployeeList from "./pages/EmployeeList";
+import EmployeeDashboard from "./pages/EmployeeDashboard";
+import ComplexityEmployees from "./pages/ComplexityEmployees";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +33,9 @@ const App = () => (
           <Route path="/log" element={<Log />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/employee-list" element={<EmployeeList />} />
+          <Route path="/employee-dashboard/:id" element={<EmployeeDashboard />} />
+          <Route path="/complexity-employees/:complexity" element={<ComplexityEmployees />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

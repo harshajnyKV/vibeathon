@@ -99,7 +99,7 @@ const AdminPage = () => {
   };
 
   const handleVibeClick = () => {
-    navigate('/dashboard');
+    navigate('/admin');
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -143,7 +143,7 @@ const AdminPage = () => {
             Search Employee
           </Button>
           <Button 
-            onClick={() => setShowEmployeeList(true)}
+            onClick={() => navigate('/employee-list')}
             className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
           >
             <Users className="w-4 h-4 mr-2" />
@@ -188,8 +188,13 @@ const AdminPage = () => {
           {/* Mood Pie Chart */}
           <Card className="glass-modal border-vibe-glass-border">
             <CardHeader>
-              <CardTitle className="font-dancing text-vibe-warm-brown text-2xl">
-                Today's Mood Distribution
+              <CardTitle className="flex items-center justify-between">
+                <span className="font-dancing text-vibe-warm-brown text-2xl">
+                  Today's Mood Distribution
+                </span>
+                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                  <Calendar className="w-4 h-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -215,14 +220,33 @@ const AdminPage = () => {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
+              {/* Color Legend */}
+              <div className="mt-4 flex flex-wrap gap-3 justify-center">
+                {mockMoodData.map((entry) => (
+                  <div key={entry.name} className="flex items-center space-x-2">
+                    <div 
+                      className="w-4 h-4 rounded"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className="text-sm font-dancing text-vibe-warm-brown">
+                      {entry.name} ({entry.value}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
           {/* Energy Line Chart */}
           <Card className="glass-modal border-vibe-glass-border">
             <CardHeader>
-              <CardTitle className="font-dancing text-vibe-warm-brown text-2xl">
-                Weekly Energy Levels
+              <CardTitle className="flex items-center justify-between">
+                <span className="font-dancing text-vibe-warm-brown text-2xl">
+                  Weekly Energy Levels
+                </span>
+                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                  <Calendar className="w-4 h-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -257,8 +281,13 @@ const AdminPage = () => {
           {/* Task Complexity Scoreboard */}
           <Card className="glass-modal border-vibe-glass-border">
             <CardHeader>
-              <CardTitle className="font-dancing text-vibe-warm-brown text-2xl">
-                Task Complexity Distribution
+              <CardTitle className="flex items-center justify-between">
+                <span className="font-dancing text-vibe-warm-brown text-2xl">
+                  Task Complexity Distribution
+                </span>
+                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                  <Calendar className="w-4 h-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -269,7 +298,8 @@ const AdminPage = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: index * 0.2, duration: 0.5 }}
-                    className="text-center p-4 glass-modal rounded-lg border border-vibe-glass-border"
+                    className="text-center p-4 glass-modal rounded-lg border border-vibe-glass-border cursor-pointer hover:border-vibe-glow-orange/50 transition-all"
+                    onClick={() => navigate(`/complexity-employees/${task.name.toLowerCase().replace(' ', '-')}`)}
                   >
                     <div className="text-3xl font-dancing text-vibe-glow-orange mb-2">
                       {task.count}
@@ -286,8 +316,13 @@ const AdminPage = () => {
           {/* Satisfaction Bar Chart */}
           <Card className="glass-modal border-vibe-glass-border">
             <CardHeader>
-              <CardTitle className="font-dancing text-vibe-warm-brown text-2xl">
-                Weekly Satisfaction Levels
+              <CardTitle className="flex items-center justify-between">
+                <span className="font-dancing text-vibe-warm-brown text-2xl">
+                  Weekly Satisfaction Levels
+                </span>
+                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                  <Calendar className="w-4 h-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
