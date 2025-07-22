@@ -1,89 +1,230 @@
-import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Upload, 
-  Users, 
-  User, 
-  LogOut, 
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Upload,
+  Users,
+  User,
+  LogOut,
   Download,
   Calendar,
   ChevronLeft,
   ChevronRight,
   Eye,
   Settings,
-  X
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
-import { format } from 'date-fns';
+  X,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  BarChart,
+  Bar,
+} from "recharts";
+import { format } from "date-fns";
+import { generateReportPDF } from "@/lib/pdfUtils";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for demonstrations
 const mockEmployees = [
-  { id: 1, name: 'John Doe', email: 'john@company.com', lastActive: '2024-01-15', password: 'temp123' },
-  { id: 2, name: 'Jane Smith', email: 'jane@company.com', lastActive: '2024-01-14', password: 'temp123' },
-  { id: 3, name: 'Mike Johnson', email: 'mike@company.com', lastActive: '2024-01-13', password: 'temp123' },
-  { id: 4, name: 'Sarah Wilson', email: 'sarah@company.com', lastActive: '2024-01-12', password: 'temp123' },
+  {
+    id: 1,
+    name: "John Doe",
+    email: "john@company.com",
+    lastActive: "2024-01-15",
+    password: "temp123",
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    email: "jane@company.com",
+    lastActive: "2024-01-14",
+    password: "temp123",
+  },
+  {
+    id: 3,
+    name: "Mike Johnson",
+    email: "mike@company.com",
+    lastActive: "2024-01-13",
+    password: "temp123",
+  },
+  {
+    id: 4,
+    name: "Sarah Wilson",
+    email: "sarah@company.com",
+    lastActive: "2024-01-12",
+    password: "temp123",
+  },
+  {
+    id: 5,
+    name: "Emily Davis",
+    email: "emily@company.com",
+    lastActive: "2024-01-11",
+    password: "temp123",
+  },
+  {
+    id: 6,
+    name: "David Brown",
+    email: "david@company.com",
+    lastActive: "2024-01-10",
+    password: "temp123",
+  },
 ];
 
-const mockMoodData = [
-  { name: 'Angry', value: 5, color: '#ef4444' },
-  { name: 'Sad', value: 8, color: '#f97316' },
-  { name: 'Happy', value: 45, color: '#eab308' },
-  { name: 'Good', value: 32, color: '#22c55e' },
-  { name: 'Joy', value: 10, color: '#06b6d4' },
-];
+// Function to generate mood data based on selected date
+const generateMoodData = (selectedDate: Date) => {
+  // Use date as seed for consistent but varying data
+  const dateString = selectedDate.toISOString().split("T")[0];
+  const seed = dateString
+    .split("-")
+    .reduce((acc, val) => acc + parseInt(val), 0);
 
-const mockEnergyData = [
-  { day: 'Mon', energy: 3.2 },
-  { day: 'Tue', energy: 3.8 },
-  { day: 'Wed', energy: 2.9 },
-  { day: 'Thu', energy: 4.1 },
-  { day: 'Fri', energy: 3.7 },
-  { day: 'Sat', energy: 4.5 },
-  { day: 'Sun', energy: 4.2 },
-];
+  // Create a simple seeded random function
+  const seededRandom = (index: number) => {
+    const x = Math.sin(seed + index) * 10000;
+    return x - Math.floor(x);
+  };
 
-const mockTaskComplexity = [
-  { name: 'Easy', count: 45 },
-  { name: 'Medium', count: 32 },
-  { name: 'Hard', count: 18 },
-  { name: 'Super Hard', count: 5 },
-];
+  const baseValues = [
+    { name: "Angry", color: "#ef4444", baseValue: 8 },
+    { name: "Sad", color: "#f97316", baseValue: 12 },
+    { name: "Happy", color: "#eab308", baseValue: 40 },
+    { name: "Good", color: "#22c55e", baseValue: 30 },
+    { name: "Joy", color: "#06b6d4", baseValue: 10 },
+  ];
 
-const mockSatisfactionData = [
-  { day: 'Mon', satisfaction: 3.5 },
-  { day: 'Tue', satisfaction: 4.1 },
-  { day: 'Wed', satisfaction: 3.8 },
-  { day: 'Thu', satisfaction: 4.3 },
-  { day: 'Fri', satisfaction: 4.0 },
-  { day: 'Sat', satisfaction: 4.2 },
-  { day: 'Sun', satisfaction: 4.5 },
-];
+  return baseValues.map((mood, index) => ({
+    ...mood,
+    value: Math.max(
+      1,
+      Math.round(mood.baseValue + (seededRandom(index) - 0.5) * 20)
+    ),
+  }));
+};
+
+// Function to generate week data based on selected date
+const generateWeekData = (
+  selectedDate: Date,
+  dataType: "energy" | "satisfaction"
+) => {
+  const startOfWeek = new Date(selectedDate);
+  const day = startOfWeek.getDay();
+  const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Get Monday
+  startOfWeek.setDate(diff);
+
+  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  
+  // Use date as seed for consistent but varying data
+  const dateString = selectedDate.toISOString().split('T')[0];
+  const seed = dateString.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+  
+  const seededRandom = (index: number) => {
+    const x = Math.sin(seed + index + (dataType === "energy" ? 100 : 200)) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const baseEnergyRange = { min: 2.5, max: 4.8 };
+  const baseSatisfactionRange = { min: 3.0, max: 4.7 };
+
+  return weekDays.map((dayName, index) => {
+    const currentDate = new Date(startOfWeek);
+    currentDate.setDate(startOfWeek.getDate() + index);
+    const formattedDate = format(currentDate, "MMM dd");
+
+    let value;
+    if (dataType === "energy") {
+      value = baseEnergyRange.min + seededRandom(index) * (baseEnergyRange.max - baseEnergyRange.min);
+    } else {
+      value = baseSatisfactionRange.min + seededRandom(index) * (baseSatisfactionRange.max - baseSatisfactionRange.min);
+    }
+
+    return {
+      day: `${dayName} (${formattedDate})`,
+      [dataType]: Math.round(value * 10) / 10, // Round to 1 decimal place
+    };
+  });
+};
+
+// Function to generate task complexity data based on selected date
+const generateTaskComplexityData = (selectedDate: Date) => {
+  const dateString = selectedDate.toISOString().split('T')[0];
+  const seed = dateString.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+  
+  const seededRandom = (index: number) => {
+    const x = Math.sin(seed + index + 300) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const baseComplexity = [
+    { name: "Easy", baseCount: 40 },
+    { name: "Medium", baseCount: 30 },
+    { name: "Hard", baseCount: 20 },
+    { name: "Super Hard", baseCount: 10 },
+  ];
+
+  return baseComplexity.map((complexity, index) => ({
+    ...complexity,
+    count: Math.max(1, Math.round(complexity.baseCount + (seededRandom(index) - 0.5) * 20)),
+  }));
+};
 
 const AdminPage = () => {
   const [showEmployeeList, setShowEmployeeList] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showUserSettings, setShowUserSettings] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<typeof mockEmployees[0] | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<
+    (typeof mockEmployees)[0] | null
+  >(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-  const [newPassword, setNewPassword] = useState('');
-  const [selectedMoodDate, setSelectedMoodDate] = useState<Date | undefined>(new Date());
-  const [selectedEnergyDate, setSelectedEnergyDate] = useState<Date | undefined>(new Date());
-  const [selectedComplexityDate, setSelectedComplexityDate] = useState<Date | undefined>(new Date());
-  const [selectedSatisfactionDate, setSelectedSatisfactionDate] = useState<Date | undefined>(new Date());
+  const [newPassword, setNewPassword] = useState("");
+  const [selectedMoodDate, setSelectedMoodDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const [selectedEnergyDate, setSelectedEnergyDate] = useState<
+    Date | undefined
+  >(new Date());
+  const [selectedComplexityDate, setSelectedComplexityDate] = useState<
+    Date | undefined
+  >(new Date());
+  const [selectedSatisfactionDate, setSelectedSatisfactionDate] = useState<
+    Date | undefined
+  >(new Date());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
+  // Generate dynamic data based on selected dates
+  const moodData = generateMoodData(selectedMoodDate || new Date());
+  const energyData = generateWeekData(
+    selectedEnergyDate || new Date(),
+    "energy"
+  );
+  const satisfactionData = generateWeekData(
+    selectedSatisfactionDate || new Date(),
+    "satisfaction"
+  );
+  const taskComplexityData = generateTaskComplexityData(selectedComplexityDate || new Date());
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'text/csv') {
+    if (file && file.type === "text/csv") {
       // Simulate CSV processing
       setTimeout(() => {
         const randomCount = Math.floor(Math.random() * 20) + 5;
@@ -95,11 +236,36 @@ const AdminPage = () => {
   };
 
   const handleLogout = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const handleVibeClick = () => {
-    navigate('/admin');
+    navigate("/admin");
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      toast({
+        title: "Generating PDF...",
+        description: "Please wait while we prepare your report.",
+        variant: "default",
+      });
+
+      await generateReportPDF("Monthly Admin Report");
+
+      toast({
+        title: "Success!",
+        description: "Your PDF report has been downloaded successfully.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -128,21 +294,21 @@ const AdminPage = () => {
     <div className="min-h-screen grainy-bg">
       {/* Header */}
       <div className="p-6 flex justify-between items-center border-b border-vibe-glass-border">
-        <h1 
+        <h1
           className="text-4xl font-dancing text-vibe-warm-brown cursor-pointer hover:text-vibe-glow-orange transition-colors"
           onClick={handleVibeClick}
         >
           Vibe
         </h1>
         <div className="flex space-x-4">
-          <Button 
-            onClick={() => navigate('/employee-list')}
+          <Button
+            onClick={() => navigate("/employee-list")}
             className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
           >
             <Users className="w-4 h-4 mr-2" />
             All Employees
           </Button>
-          <Button 
+          <Button
             onClick={() => setShowUploadModal(true)}
             className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
           >
@@ -150,7 +316,7 @@ const AdminPage = () => {
             Upload CSV
           </Button>
           <div className="relative group">
-            <button 
+            <button
               onClick={() => setShowUserSettings(true)}
               className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
             >
@@ -175,7 +341,7 @@ const AdminPage = () => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="p-6 space-y-8">
+      <div id="main-content" className="p-6 space-y-8">
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Mood Pie Chart */}
@@ -183,11 +349,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Mood Distribution - {selectedMoodDate ? format(selectedMoodDate, 'MMM dd, yyyy') : 'Today'}
+                  Mood Distribution -{" "}
+                  {selectedMoodDate
+                    ? format(selectedMoodDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -198,6 +370,8 @@ const AdminPage = () => {
                       onSelect={setSelectedMoodDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -208,7 +382,7 @@ const AdminPage = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={mockMoodData}
+                      data={moodData}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
@@ -218,7 +392,7 @@ const AdminPage = () => {
                       animationBegin={0}
                       animationDuration={1500}
                     >
-                      {mockMoodData.map((entry, index) => (
+                      {moodData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -228,9 +402,9 @@ const AdminPage = () => {
               </div>
               {/* Color Legend */}
               <div className="mt-4 flex flex-wrap gap-3 justify-center">
-                {mockMoodData.map((entry) => (
+                {moodData.map((entry) => (
                   <div key={entry.name} className="flex items-center space-x-2">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded"
                       style={{ backgroundColor: entry.color }}
                     />
@@ -248,11 +422,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Energy Levels - Week of {selectedEnergyDate ? format(selectedEnergyDate, 'MMM dd, yyyy') : 'Today'}
+                  Energy Levels - Week of{" "}
+                  {selectedEnergyDate
+                    ? format(selectedEnergyDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -263,6 +443,8 @@ const AdminPage = () => {
                       onSelect={setSelectedEnergyDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -271,24 +453,28 @@ const AdminPage = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockEnergyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--vibe-glass-border))" />
-                    <XAxis 
-                      dataKey="day" 
+                  <LineChart data={energyData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--vibe-glass-border))"
+                    />
+                    <XAxis
+                      dataKey="day"
                       stroke="hsl(var(--vibe-warm-brown))"
                       fontSize={12}
                     />
-                    <YAxis 
-                      stroke="hsl(var(--vibe-warm-brown))"
-                      fontSize={12}
-                    />
+                    <YAxis stroke="hsl(var(--vibe-warm-brown))" fontSize={12} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="energy" 
-                      stroke="hsl(var(--vibe-glow-orange))" 
+                    <Line
+                      type="monotone"
+                      dataKey="energy"
+                      stroke="hsl(var(--vibe-glow-orange))"
                       strokeWidth={3}
-                      dot={{ fill: 'hsl(var(--vibe-soft-orange))', strokeWidth: 2, r: 6 }}
+                      dot={{
+                        fill: "hsl(var(--vibe-soft-orange))",
+                        strokeWidth: 2,
+                        r: 6,
+                      }}
                       animationDuration={2000}
                     />
                   </LineChart>
@@ -302,11 +488,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Task Complexity - {selectedComplexityDate ? format(selectedComplexityDate, 'MMM dd, yyyy') : 'Today'}
+                  Task Complexity -{" "}
+                  {selectedComplexityDate
+                    ? format(selectedComplexityDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -317,6 +509,8 @@ const AdminPage = () => {
                       onSelect={setSelectedComplexityDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -324,14 +518,20 @@ const AdminPage = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                {mockTaskComplexity.map((task, index) => (
+                {taskComplexityData.map((task, index) => (
                   <motion.div
                     key={task.name}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: index * 0.2, duration: 0.5 }}
                     className="text-center p-4 glass-modal rounded-lg border border-vibe-glass-border cursor-pointer hover:border-vibe-glow-orange/50 transition-all"
-                    onClick={() => navigate(`/complexity-employees/${task.name.toLowerCase().replace(' ', '-')}`)}
+                    onClick={() =>
+                      navigate(
+                        `/complexity-employees/${task.name
+                          .toLowerCase()
+                          .replace(" ", "-")}`
+                      )
+                    }
                   >
                     <div className="text-3xl font-dancing text-vibe-glow-orange mb-2">
                       {task.count}
@@ -350,11 +550,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Satisfaction Levels - Week of {selectedSatisfactionDate ? format(selectedSatisfactionDate, 'MMM dd, yyyy') : 'Today'}
+                  Satisfaction Levels - Week of{" "}
+                  {selectedSatisfactionDate
+                    ? format(selectedSatisfactionDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -365,6 +571,8 @@ const AdminPage = () => {
                       onSelect={setSelectedSatisfactionDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -373,20 +581,20 @@ const AdminPage = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={mockSatisfactionData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--vibe-glass-border))" />
-                    <XAxis 
-                      dataKey="day" 
+                  <BarChart data={satisfactionData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--vibe-glass-border))"
+                    />
+                    <XAxis
+                      dataKey="day"
                       stroke="hsl(var(--vibe-warm-brown))"
                       fontSize={12}
                     />
-                    <YAxis 
-                      stroke="hsl(var(--vibe-warm-brown))"
-                      fontSize={12}
-                    />
+                    <YAxis stroke="hsl(var(--vibe-warm-brown))" fontSize={12} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar 
-                      dataKey="satisfaction" 
+                    <Bar
+                      dataKey="satisfaction"
                       fill="hsl(var(--vibe-soft-orange))"
                       animationDuration={1500}
                       animationBegin={500}
@@ -400,13 +608,15 @@ const AdminPage = () => {
 
         {/* Export Button */}
         <div className="flex justify-center">
-          <Button className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white text-lg px-8 py-3">
+          <Button
+            onClick={handleExportPDF}
+            className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white text-lg px-8 py-3"
+          >
             <Download className="w-5 h-5 mr-2" />
             Export Monthly Report
           </Button>
         </div>
       </div>
-
 
       {/* Employee List Modal */}
       <AnimatePresence>
@@ -618,7 +828,7 @@ const AdminPage = () => {
                   <X className="w-6 h-6 text-vibe-warm-brown" />
                 </button>
               </div>
-              
+
               {/* Employee Dashboard Preview */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="glass-modal border-vibe-glass-border">
@@ -630,11 +840,11 @@ const AdminPage = () => {
                   <CardContent>
                     <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={mockEnergyData}>
-                          <Line 
-                            type="monotone" 
-                            dataKey="energy" 
-                            stroke="hsl(var(--vibe-glow-orange))" 
+                        <LineChart data={energyData}>
+                          <Line
+                            type="monotone"
+                            dataKey="energy"
+                            stroke="hsl(var(--vibe-glow-orange))"
                             strokeWidth={2}
                           />
                         </LineChart>
@@ -642,7 +852,7 @@ const AdminPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card className="glass-modal border-vibe-glass-border">
                   <CardHeader>
                     <CardTitle className="font-dancing text-vibe-warm-brown">
@@ -652,16 +862,28 @@ const AdminPage = () => {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="font-dancing text-vibe-warm-brown">This Week</span>
-                        <span className="font-dancing text-vibe-glow-orange">12 tasks</span>
+                        <span className="font-dancing text-vibe-warm-brown">
+                          This Week
+                        </span>
+                        <span className="font-dancing text-vibe-glow-orange">
+                          12 tasks
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-dancing text-vibe-warm-brown">Satisfaction</span>
-                        <span className="font-dancing text-vibe-glow-orange">4.2/5</span>
+                        <span className="font-dancing text-vibe-warm-brown">
+                          Satisfaction
+                        </span>
+                        <span className="font-dancing text-vibe-glow-orange">
+                          4.2/5
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-dancing text-vibe-warm-brown">Energy Level</span>
-                        <span className="font-dancing text-vibe-glow-orange">3.8/5</span>
+                        <span className="font-dancing text-vibe-warm-brown">
+                          Energy Level
+                        </span>
+                        <span className="font-dancing text-vibe-glow-orange">
+                          3.8/5
+                        </span>
                       </div>
                     </div>
                   </CardContent>

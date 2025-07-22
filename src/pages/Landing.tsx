@@ -10,20 +10,26 @@ const Landing = () => {
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState<'HR' | 'Employee'>('Employee');
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Show login modal immediately
-    setShowModal(true);
-    setShowHeading(false);
+    // Show heading first, then transition to login modal after 3 seconds
+    const timer = setTimeout(() => {
+      setShowHeading(false);
+      // Add a small delay after heading disappears before showing modal
+      setTimeout(() => {
+        setShowModal(true);
+      }, 500);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLogin = () => {
     if (email && password) {
-      if (userType === 'HR' && email === "harsha.j@keyvalue.systems") {
+      if (email === "harsha.j@keyvalue.systems" || email === "sarath.ms@keyvalue.systems") {
         navigate("/admin");
-      } else if (userType === 'Employee') {
+      } else {
         navigate("/mood");
       }
     }
@@ -52,35 +58,7 @@ const Landing = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-vibe-warm-brown">User Type</Label>
-                <div className="flex space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setUserType('HR')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
-                      userType === 'HR' 
-                        ? 'bg-vibe-soft-orange text-white' 
-                        : 'bg-background/50 border border-vibe-glass-border text-vibe-warm-brown'
-                    }`}
-                  >
-                    HR
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setUserType('Employee')}
-                    className={`px-4 py-2 rounded-lg transition-all ${
-                      userType === 'Employee' 
-                        ? 'bg-vibe-soft-orange text-white' 
-                        : 'bg-background/50 border border-vibe-glass-border text-vibe-warm-brown'
-                    }`}
-                  >
-                    Employee
-                  </button>
-                </div>
-              </div>
-            </div>
+
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-vibe-warm-brown">Email</Label>

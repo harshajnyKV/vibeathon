@@ -121,27 +121,39 @@ All colors MUST be HSL.
 
   body {
     @apply text-foreground;
-    background: linear-gradient(135deg, hsl(45 100% 85%), hsl(25 100% 75%), hsl(340 80% 75%), hsl(300 70% 70%), hsl(250 80% 75%), hsl(220 80% 80%));
+    background: linear-gradient(135deg, 
+      hsl(25 60% 95%), 
+      hsl(20 90% 85%), 
+      hsl(0 0% 90%), 
+      hsl(25 30% 80%), 
+      hsl(0 0% 95%)
+    );
     background-image: 
-      radial-gradient(circle at 20% 30%, hsla(45, 100%, 90%, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, hsla(340, 80%, 80%, 0.4) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, hsla(280, 70%, 75%, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 1px 1px, hsla(0, 0%, 100%, 0.2) 1px, transparent 0),
-      radial-gradient(circle at 2px 2px, hsla(0, 0%, 100%, 0.15) 0.8px, transparent 0),
-      radial-gradient(circle at 3px 3px, hsla(0, 0%, 100%, 0.1) 0.5px, transparent 0);
+      radial-gradient(circle at 20% 30%, hsla(25, 60%, 90%, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsla(20, 90%, 85%, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, hsla(0, 0%, 95%, 0.5) 0%, transparent 50%),
+      radial-gradient(circle at 1px 1px, hsla(0, 0%, 100%, 0.3) 1px, transparent 0),
+      radial-gradient(circle at 2px 2px, hsla(25, 20%, 90%, 0.2) 0.8px, transparent 0),
+      radial-gradient(circle at 3px 3px, hsla(0, 0%, 85%, 0.15) 0.5px, transparent 0);
     background-size: 100% 100%, 100% 100%, 100% 100%, 15px 15px, 8px 8px, 12px 12px;
   }
 
-  /* Colorful gradient background with grains and patterns */
+  /* Orange-grey-white gradient background with grains and patterns */
   .grainy-bg {
-    background: linear-gradient(135deg, hsl(45 100% 85%), hsl(25 100% 75%), hsl(340 80% 75%), hsl(300 70% 70%), hsl(250 80% 75%), hsl(220 80% 80%));
+    background: linear-gradient(135deg, 
+      hsl(25 60% 92%), 
+      hsl(20 90% 80%), 
+      hsl(0 0% 88%), 
+      hsl(25 40% 75%), 
+      hsl(0 0% 92%)
+    );
     background-image: 
-      radial-gradient(circle at 20% 30%, hsla(45, 100%, 90%, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, hsla(340, 80%, 80%, 0.4) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, hsla(280, 70%, 75%, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 1px 1px, hsla(0, 0%, 100%, 0.2) 1px, transparent 0),
-      radial-gradient(circle at 2px 2px, hsla(0, 0%, 100%, 0.15) 0.8px, transparent 0),
-      radial-gradient(circle at 3px 3px, hsla(0, 0%, 100%, 0.1) 0.5px, transparent 0);
+      radial-gradient(circle at 20% 30%, hsla(25, 60%, 70%, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsla(20, 90%, 75%, 0.25) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, hsla(0, 0%, 90%, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 1px 1px, hsla(0, 0%, 100%, 0.4) 1px, transparent 0),
+      radial-gradient(circle at 2px 2px, hsla(25, 30%, 85%, 0.25) 0.8px, transparent 0),
+      radial-gradient(circle at 3px 3px, hsla(0, 0%, 80%, 0.2) 0.5px, transparent 0);
     background-size: 100% 100%, 100% 100%, 100% 100%, 15px 15px, 8px 8px, 12px 12px;
   }
 
