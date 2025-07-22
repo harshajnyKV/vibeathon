@@ -72,15 +72,52 @@ const mockEmployees = [
     lastActive: "2024-01-12",
     password: "temp123",
   },
+  {
+    id: 5,
+    name: "Emily Davis",
+    email: "emily@company.com",
+    lastActive: "2024-01-11",
+    password: "temp123",
+  },
+  {
+    id: 6,
+    name: "David Brown",
+    email: "david@company.com",
+    lastActive: "2024-01-10",
+    password: "temp123",
+  },
 ];
 
-const mockMoodData = [
-  { name: "Angry", value: 5, color: "#ef4444" },
-  { name: "Sad", value: 8, color: "#f97316" },
-  { name: "Happy", value: 45, color: "#eab308" },
-  { name: "Good", value: 32, color: "#22c55e" },
-  { name: "Joy", value: 10, color: "#06b6d4" },
-];
+// Function to generate mood data based on selected date
+const generateMoodData = (selectedDate: Date) => {
+  // Use date as seed for consistent but varying data
+  const dateString = selectedDate.toISOString().split("T")[0];
+  const seed = dateString
+    .split("-")
+    .reduce((acc, val) => acc + parseInt(val), 0);
+
+  // Create a simple seeded random function
+  const seededRandom = (index: number) => {
+    const x = Math.sin(seed + index) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const baseValues = [
+    { name: "Angry", color: "#ef4444", baseValue: 8 },
+    { name: "Sad", color: "#f97316", baseValue: 12 },
+    { name: "Happy", color: "#eab308", baseValue: 40 },
+    { name: "Good", color: "#22c55e", baseValue: 30 },
+    { name: "Joy", color: "#06b6d4", baseValue: 10 },
+  ];
+
+  return baseValues.map((mood, index) => ({
+    ...mood,
+    value: Math.max(
+      1,
+      Math.round(mood.baseValue + (seededRandom(index) - 0.5) * 20)
+    ),
+  }));
+};
 
 // Function to generate week data based on selected date
 const generateWeekData = (
@@ -93,30 +130,60 @@ const generateWeekData = (
   startOfWeek.setDate(diff);
 
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const baseEnergyValues = [3.2, 3.8, 2.9, 4.1, 3.7, 4.5, 4.2];
-  const baseSatisfactionValues = [3.5, 4.1, 3.8, 4.3, 4.0, 4.2, 4.5];
+  
+  // Use date as seed for consistent but varying data
+  const dateString = selectedDate.toISOString().split('T')[0];
+  const seed = dateString.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+  
+  const seededRandom = (index: number) => {
+    const x = Math.sin(seed + index + (dataType === "energy" ? 100 : 200)) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const baseEnergyRange = { min: 2.5, max: 4.8 };
+  const baseSatisfactionRange = { min: 3.0, max: 4.7 };
 
   return weekDays.map((dayName, index) => {
     const currentDate = new Date(startOfWeek);
     currentDate.setDate(startOfWeek.getDate() + index);
     const formattedDate = format(currentDate, "MMM dd");
 
+    let value;
+    if (dataType === "energy") {
+      value = baseEnergyRange.min + seededRandom(index) * (baseEnergyRange.max - baseEnergyRange.min);
+    } else {
+      value = baseSatisfactionRange.min + seededRandom(index) * (baseSatisfactionRange.max - baseSatisfactionRange.min);
+    }
+
     return {
       day: `${dayName} (${formattedDate})`,
-      [dataType]:
-        dataType === "energy"
-          ? baseEnergyValues[index]
-          : baseSatisfactionValues[index],
+      [dataType]: Math.round(value * 10) / 10, // Round to 1 decimal place
     };
   });
 };
 
-const mockTaskComplexity = [
-  { name: "Easy", count: 45 },
-  { name: "Medium", count: 32 },
-  { name: "Hard", count: 18 },
-  { name: "Super Hard", count: 5 },
-];
+// Function to generate task complexity data based on selected date
+const generateTaskComplexityData = (selectedDate: Date) => {
+  const dateString = selectedDate.toISOString().split('T')[0];
+  const seed = dateString.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+  
+  const seededRandom = (index: number) => {
+    const x = Math.sin(seed + index + 300) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const baseComplexity = [
+    { name: "Easy", baseCount: 40 },
+    { name: "Medium", baseCount: 30 },
+    { name: "Hard", baseCount: 20 },
+    { name: "Super Hard", baseCount: 10 },
+  ];
+
+  return baseComplexity.map((complexity, index) => ({
+    ...complexity,
+    count: Math.max(1, Math.round(complexity.baseCount + (seededRandom(index) - 0.5) * 20)),
+  }));
+};
 
 const AdminPage = () => {
   const [showEmployeeList, setShowEmployeeList] = useState(false);
@@ -144,6 +211,7 @@ const AdminPage = () => {
   const { toast } = useToast();
 
   // Generate dynamic data based on selected dates
+  const moodData = generateMoodData(selectedMoodDate || new Date());
   const energyData = generateWeekData(
     selectedEnergyDate || new Date(),
     "energy"
@@ -152,6 +220,7 @@ const AdminPage = () => {
     selectedSatisfactionDate || new Date(),
     "satisfaction"
   );
+  const taskComplexityData = generateTaskComplexityData(selectedComplexityDate || new Date());
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -311,7 +380,7 @@ const AdminPage = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={mockMoodData}
+                      data={moodData}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
@@ -321,7 +390,7 @@ const AdminPage = () => {
                       animationBegin={0}
                       animationDuration={1500}
                     >
-                      {mockMoodData.map((entry, index) => (
+                      {moodData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -331,7 +400,7 @@ const AdminPage = () => {
               </div>
               {/* Color Legend */}
               <div className="mt-4 flex flex-wrap gap-3 justify-center">
-                {mockMoodData.map((entry) => (
+                {moodData.map((entry) => (
                   <div key={entry.name} className="flex items-center space-x-2">
                     <div
                       className="w-4 h-4 rounded"
@@ -443,7 +512,7 @@ const AdminPage = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                {mockTaskComplexity.map((task, index) => (
+                {taskComplexityData.map((task, index) => (
                   <motion.div
                     key={task.name}
                     initial={{ scale: 0 }}
