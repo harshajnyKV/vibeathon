@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BarChart3, User } from "lucide-react";
@@ -17,6 +17,10 @@ const Mood = () => {
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+      console.log("Selected mood: ", selectedMood)
+  },[])
 
   const handleSetMood = (index: number) => {
     setSelectedMood(index);
