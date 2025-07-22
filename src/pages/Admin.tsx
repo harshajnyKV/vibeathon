@@ -1,96 +1,161 @@
-import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Upload, 
-  Users, 
-  User, 
-  LogOut, 
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Upload,
+  Users,
+  User,
+  LogOut,
   Download,
   Calendar,
   ChevronLeft,
   ChevronRight,
   Eye,
   Settings,
-  X
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
-import { format } from 'date-fns';
+  X,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  BarChart,
+  Bar,
+} from "recharts";
+import { format } from "date-fns";
+import { generateReportPDF } from "@/lib/pdfUtils";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for demonstrations
 const mockEmployees = [
-  { id: 1, name: 'John Doe', email: 'john@company.com', lastActive: '2024-01-15', password: 'temp123' },
-  { id: 2, name: 'Jane Smith', email: 'jane@company.com', lastActive: '2024-01-14', password: 'temp123' },
-  { id: 3, name: 'Mike Johnson', email: 'mike@company.com', lastActive: '2024-01-13', password: 'temp123' },
-  { id: 4, name: 'Sarah Wilson', email: 'sarah@company.com', lastActive: '2024-01-12', password: 'temp123' },
+  {
+    id: 1,
+    name: "John Doe",
+    email: "john@company.com",
+    lastActive: "2024-01-15",
+    password: "temp123",
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    email: "jane@company.com",
+    lastActive: "2024-01-14",
+    password: "temp123",
+  },
+  {
+    id: 3,
+    name: "Mike Johnson",
+    email: "mike@company.com",
+    lastActive: "2024-01-13",
+    password: "temp123",
+  },
+  {
+    id: 4,
+    name: "Sarah Wilson",
+    email: "sarah@company.com",
+    lastActive: "2024-01-12",
+    password: "temp123",
+  },
 ];
 
 const mockMoodData = [
-  { name: 'Angry', value: 5, color: '#ef4444' },
-  { name: 'Sad', value: 8, color: '#f97316' },
-  { name: 'Happy', value: 45, color: '#eab308' },
-  { name: 'Good', value: 32, color: '#22c55e' },
-  { name: 'Joy', value: 10, color: '#06b6d4' },
+  { name: "Angry", value: 5, color: "#ef4444" },
+  { name: "Sad", value: 8, color: "#f97316" },
+  { name: "Happy", value: 45, color: "#eab308" },
+  { name: "Good", value: 32, color: "#22c55e" },
+  { name: "Joy", value: 10, color: "#06b6d4" },
 ];
 
 // Function to generate week data based on selected date
-const generateWeekData = (selectedDate: Date, dataType: 'energy' | 'satisfaction') => {
+const generateWeekData = (
+  selectedDate: Date,
+  dataType: "energy" | "satisfaction"
+) => {
   const startOfWeek = new Date(selectedDate);
   const day = startOfWeek.getDay();
   const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Get Monday
   startOfWeek.setDate(diff);
 
-  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const baseEnergyValues = [3.2, 3.8, 2.9, 4.1, 3.7, 4.5, 4.2];
   const baseSatisfactionValues = [3.5, 4.1, 3.8, 4.3, 4.0, 4.2, 4.5];
 
   return weekDays.map((dayName, index) => {
     const currentDate = new Date(startOfWeek);
     currentDate.setDate(startOfWeek.getDate() + index);
-    const formattedDate = format(currentDate, 'MMM dd');
-    
+    const formattedDate = format(currentDate, "MMM dd");
+
     return {
       day: `${dayName} (${formattedDate})`,
-      [dataType]: dataType === 'energy' ? baseEnergyValues[index] : baseSatisfactionValues[index]
+      [dataType]:
+        dataType === "energy"
+          ? baseEnergyValues[index]
+          : baseSatisfactionValues[index],
     };
   });
 };
 
 const mockTaskComplexity = [
-  { name: 'Easy', count: 45 },
-  { name: 'Medium', count: 32 },
-  { name: 'Hard', count: 18 },
-  { name: 'Super Hard', count: 5 },
+  { name: "Easy", count: 45 },
+  { name: "Medium", count: 32 },
+  { name: "Hard", count: 18 },
+  { name: "Super Hard", count: 5 },
 ];
 
 const AdminPage = () => {
   const [showEmployeeList, setShowEmployeeList] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showUserSettings, setShowUserSettings] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<typeof mockEmployees[0] | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<
+    (typeof mockEmployees)[0] | null
+  >(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-  const [newPassword, setNewPassword] = useState('');
-  const [selectedMoodDate, setSelectedMoodDate] = useState<Date | undefined>(new Date());
-  const [selectedEnergyDate, setSelectedEnergyDate] = useState<Date | undefined>(new Date());
-  const [selectedComplexityDate, setSelectedComplexityDate] = useState<Date | undefined>(new Date());
-  const [selectedSatisfactionDate, setSelectedSatisfactionDate] = useState<Date | undefined>(new Date());
+  const [newPassword, setNewPassword] = useState("");
+  const [selectedMoodDate, setSelectedMoodDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const [selectedEnergyDate, setSelectedEnergyDate] = useState<
+    Date | undefined
+  >(new Date());
+  const [selectedComplexityDate, setSelectedComplexityDate] = useState<
+    Date | undefined
+  >(new Date());
+  const [selectedSatisfactionDate, setSelectedSatisfactionDate] = useState<
+    Date | undefined
+  >(new Date());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Generate dynamic data based on selected dates
-  const energyData = generateWeekData(selectedEnergyDate || new Date(), 'energy');
-  const satisfactionData = generateWeekData(selectedSatisfactionDate || new Date(), 'satisfaction');
-
+  const energyData = generateWeekData(
+    selectedEnergyDate || new Date(),
+    "energy"
+  );
+  const satisfactionData = generateWeekData(
+    selectedSatisfactionDate || new Date(),
+    "satisfaction"
+  );
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'text/csv') {
+    if (file && file.type === "text/csv") {
       // Simulate CSV processing
       setTimeout(() => {
         const randomCount = Math.floor(Math.random() * 20) + 5;
@@ -102,11 +167,36 @@ const AdminPage = () => {
   };
 
   const handleLogout = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const handleVibeClick = () => {
-    navigate('/admin');
+    navigate("/admin");
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      toast({
+        title: "Generating PDF...",
+        description: "Please wait while we prepare your report.",
+        variant: "default",
+      });
+
+      await generateReportPDF("Monthly Admin Report");
+
+      toast({
+        title: "Success!",
+        description: "Your PDF report has been downloaded successfully.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -135,21 +225,21 @@ const AdminPage = () => {
     <div className="min-h-screen grainy-bg">
       {/* Header */}
       <div className="p-6 flex justify-between items-center border-b border-vibe-glass-border">
-        <h1 
+        <h1
           className="text-4xl font-dancing text-vibe-warm-brown cursor-pointer hover:text-vibe-glow-orange transition-colors"
           onClick={handleVibeClick}
         >
           Vibe
         </h1>
         <div className="flex space-x-4">
-          <Button 
-            onClick={() => navigate('/employee-list')}
+          <Button
+            onClick={() => navigate("/employee-list")}
             className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
           >
             <Users className="w-4 h-4 mr-2" />
             All Employees
           </Button>
-          <Button 
+          <Button
             onClick={() => setShowUploadModal(true)}
             className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
           >
@@ -157,7 +247,7 @@ const AdminPage = () => {
             Upload CSV
           </Button>
           <div className="relative group">
-            <button 
+            <button
               onClick={() => setShowUserSettings(true)}
               className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
             >
@@ -182,7 +272,7 @@ const AdminPage = () => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="p-6 space-y-8">
+      <div id="main-content" className="p-6 space-y-8">
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Mood Pie Chart */}
@@ -190,11 +280,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Mood Distribution - {selectedMoodDate ? format(selectedMoodDate, 'MMM dd, yyyy') : 'Today'}
+                  Mood Distribution -{" "}
+                  {selectedMoodDate
+                    ? format(selectedMoodDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -237,7 +333,7 @@ const AdminPage = () => {
               <div className="mt-4 flex flex-wrap gap-3 justify-center">
                 {mockMoodData.map((entry) => (
                   <div key={entry.name} className="flex items-center space-x-2">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded"
                       style={{ backgroundColor: entry.color }}
                     />
@@ -255,11 +351,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Energy Levels - Week of {selectedEnergyDate ? format(selectedEnergyDate, 'MMM dd, yyyy') : 'Today'}
+                  Energy Levels - Week of{" "}
+                  {selectedEnergyDate
+                    ? format(selectedEnergyDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -279,23 +381,27 @@ const AdminPage = () => {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={energyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--vibe-glass-border))" />
-                    <XAxis 
-                      dataKey="day" 
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--vibe-glass-border))"
+                    />
+                    <XAxis
+                      dataKey="day"
                       stroke="hsl(var(--vibe-warm-brown))"
                       fontSize={12}
                     />
-                    <YAxis 
-                      stroke="hsl(var(--vibe-warm-brown))"
-                      fontSize={12}
-                    />
+                    <YAxis stroke="hsl(var(--vibe-warm-brown))" fontSize={12} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="energy" 
-                      stroke="hsl(var(--vibe-glow-orange))" 
+                    <Line
+                      type="monotone"
+                      dataKey="energy"
+                      stroke="hsl(var(--vibe-glow-orange))"
                       strokeWidth={3}
-                      dot={{ fill: 'hsl(var(--vibe-soft-orange))', strokeWidth: 2, r: 6 }}
+                      dot={{
+                        fill: "hsl(var(--vibe-soft-orange))",
+                        strokeWidth: 2,
+                        r: 6,
+                      }}
                       animationDuration={2000}
                     />
                   </LineChart>
@@ -309,11 +415,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Task Complexity - {selectedComplexityDate ? format(selectedComplexityDate, 'MMM dd, yyyy') : 'Today'}
+                  Task Complexity -{" "}
+                  {selectedComplexityDate
+                    ? format(selectedComplexityDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -338,7 +450,13 @@ const AdminPage = () => {
                     animate={{ scale: 1 }}
                     transition={{ delay: index * 0.2, duration: 0.5 }}
                     className="text-center p-4 glass-modal rounded-lg border border-vibe-glass-border cursor-pointer hover:border-vibe-glow-orange/50 transition-all"
-                    onClick={() => navigate(`/complexity-employees/${task.name.toLowerCase().replace(' ', '-')}`)}
+                    onClick={() =>
+                      navigate(
+                        `/complexity-employees/${task.name
+                          .toLowerCase()
+                          .replace(" ", "-")}`
+                      )
+                    }
                   >
                     <div className="text-3xl font-dancing text-vibe-glow-orange mb-2">
                       {task.count}
@@ -357,11 +475,17 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Satisfaction Levels - Week of {selectedSatisfactionDate ? format(selectedSatisfactionDate, 'MMM dd, yyyy') : 'Today'}
+                  Satisfaction Levels - Week of{" "}
+                  {selectedSatisfactionDate
+                    ? format(selectedSatisfactionDate, "MMM dd, yyyy")
+                    : "Today"}
                 </span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                    <Button
+                      variant="outline"
+                      className="bg-background/50 border-vibe-glass-border"
+                    >
                       <Calendar className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
@@ -381,19 +505,19 @@ const AdminPage = () => {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={satisfactionData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--vibe-glass-border))" />
-                    <XAxis 
-                      dataKey="day" 
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--vibe-glass-border))"
+                    />
+                    <XAxis
+                      dataKey="day"
                       stroke="hsl(var(--vibe-warm-brown))"
                       fontSize={12}
                     />
-                    <YAxis 
-                      stroke="hsl(var(--vibe-warm-brown))"
-                      fontSize={12}
-                    />
+                    <YAxis stroke="hsl(var(--vibe-warm-brown))" fontSize={12} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar 
-                      dataKey="satisfaction" 
+                    <Bar
+                      dataKey="satisfaction"
                       fill="hsl(var(--vibe-soft-orange))"
                       animationDuration={1500}
                       animationBegin={500}
@@ -407,13 +531,15 @@ const AdminPage = () => {
 
         {/* Export Button */}
         <div className="flex justify-center">
-          <Button className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white text-lg px-8 py-3">
+          <Button
+            onClick={handleExportPDF}
+            className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white text-lg px-8 py-3"
+          >
             <Download className="w-5 h-5 mr-2" />
             Export Monthly Report
           </Button>
         </div>
       </div>
-
 
       {/* Employee List Modal */}
       <AnimatePresence>
@@ -625,7 +751,7 @@ const AdminPage = () => {
                   <X className="w-6 h-6 text-vibe-warm-brown" />
                 </button>
               </div>
-              
+
               {/* Employee Dashboard Preview */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="glass-modal border-vibe-glass-border">
@@ -638,10 +764,10 @@ const AdminPage = () => {
                     <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={energyData}>
-                          <Line 
-                            type="monotone" 
-                            dataKey="energy" 
-                            stroke="hsl(var(--vibe-glow-orange))" 
+                          <Line
+                            type="monotone"
+                            dataKey="energy"
+                            stroke="hsl(var(--vibe-glow-orange))"
                             strokeWidth={2}
                           />
                         </LineChart>
@@ -649,7 +775,7 @@ const AdminPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card className="glass-modal border-vibe-glass-border">
                   <CardHeader>
                     <CardTitle className="font-dancing text-vibe-warm-brown">
@@ -659,16 +785,28 @@ const AdminPage = () => {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="font-dancing text-vibe-warm-brown">This Week</span>
-                        <span className="font-dancing text-vibe-glow-orange">12 tasks</span>
+                        <span className="font-dancing text-vibe-warm-brown">
+                          This Week
+                        </span>
+                        <span className="font-dancing text-vibe-glow-orange">
+                          12 tasks
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-dancing text-vibe-warm-brown">Satisfaction</span>
-                        <span className="font-dancing text-vibe-glow-orange">4.2/5</span>
+                        <span className="font-dancing text-vibe-warm-brown">
+                          Satisfaction
+                        </span>
+                        <span className="font-dancing text-vibe-glow-orange">
+                          4.2/5
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-dancing text-vibe-warm-brown">Energy Level</span>
-                        <span className="font-dancing text-vibe-glow-orange">3.8/5</span>
+                        <span className="font-dancing text-vibe-warm-brown">
+                          Energy Level
+                        </span>
+                        <span className="font-dancing text-vibe-glow-orange">
+                          3.8/5
+                        </span>
                       </div>
                     </div>
                   </CardContent>
