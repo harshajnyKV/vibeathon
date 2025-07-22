@@ -7,11 +7,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { generateReportPDF } from "@/lib/pdfUtils";
 import { useToast } from "@/hooks/use-toast";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
 import UserSettings from "@/components/UserSettings";
 
 // Mock data - in real app this would come from API/context
@@ -115,6 +120,13 @@ const DashboardPage = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [currentMonthGroup, setCurrentMonthGroup] = useState(0);
+  
+  // Mood chart date range state
+  const [moodDateRange, setMoodDateRange] = useState<DateRange | undefined>({
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    to: new Date(new Date().getFullYear(), new Date().getMonth(), 7)
+  });
+  const [showMoodCalendar, setShowMoodCalendar] = useState(false);
 
   const goBack = () => {
     navigate("/mood");
@@ -209,6 +221,37 @@ const DashboardPage = () => {
   const complexityLabels = ["Easy", "Medium", "Hard", "Super Hard"];
   const energyLabels = ["Very Low", "Low", "Average", "Good", "Max"];
 
+  // Generate mood data for selected date range
+  const generateMoodData = () => {
+    if (!moodDateRange?.from || !moodDateRange?.to) return [];
+    
+    const data = [];
+    const currentDate = new Date(moodDateRange.from);
+    
+    while (currentDate <= moodDateRange.to) {
+      data.push({
+        date: currentDate.getDate().toString().padStart(2, '0'),
+        mood: Math.floor(Math.random() * 5) + 1,
+        day: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
+        fullDate: new Date(currentDate)
+      });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return data;
+  };
+
+  const moodChartData = generateMoodData();
+
+  const getMoodDateRangeText = () => {
+    if (!moodDateRange?.from || !moodDateRange?.to) return "Select Date Range";
+    
+    const startText = format(moodDateRange.from, "MMM dd");
+    const endText = format(moodDateRange.to, "MMM dd, yyyy");
+    
+    return `${startText} - ${endText}`;
+  };
+
   const handleExportPDF = async () => {
     try {
       toast({
@@ -290,37 +333,61 @@ const DashboardPage = () => {
             <h3 className="text-2xl font-dancing font-bold text-vibe-warm-brown">
               Mood Chart
             </h3>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => changeMonth("prev")}
-                className="p-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-medium min-w-[120px] text-center">
-                {monthNames[currentMonth]} {currentYear}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => changeMonth("next")}
-                className="p-1"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+            <Popover open={showMoodCalendar} onOpenChange={setShowMoodCalendar}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="bg-background/50 border-vibe-glass-border hover:bg-vibe-soft-orange/10 text-vibe-warm-brown"
+                >
+                  <CalendarIcon className="w-4 h-4 mr-2" />
+                  {getMoodDateRangeText()}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-4" align="end">
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-vibe-warm-brown mb-2">
+                    Select Date Range
+                  </div>
+                  
+                  <Calendar
+                    mode="range"
+                    selected={moodDateRange}
+                    onSelect={(range) => setMoodDateRange(range)}
+                    className="rounded-md border border-vibe-glass-border"
+                    numberOfMonths={2}
+                  />
+                  
+                  <div className="flex justify-end space-x-2 pt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowMoodCalendar(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      size="sm"
+                      className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
+                      onClick={() => setShowMoodCalendar(false)}
+                      disabled={!moodDateRange?.from || !moodDateRange?.to}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          <div className="flex justify-around items-end h-64 border-b border-vibe-glass-border">
-            {moodData.map((day, index) => (
+          <div className="flex justify-around items-end h-64 border-b border-vibe-glass-border overflow-x-auto">
+            {moodChartData.map((day, index) => (
               <motion.div
                 key={index}
-                className="flex flex-col items-center space-y-2"
+                className="flex flex-col items-center space-y-2 min-w-0 flex-shrink-0"
                 initial={{ height: 0 }}
                 animate={{ height: "auto" }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
+                title={`${day.fullDate.toLocaleDateString()}: Mood ${day.mood}/5`}
               >
                 <motion.div
                   className="w-8 rounded-t transition-all duration-500"
