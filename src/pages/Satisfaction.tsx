@@ -5,32 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { SoundPlayer } from '@/utils/sounds';
 import BackgroundMusic from '@/components/BackgroundMusic';
 
-// Color interpolation function
+// Theme-based color interpolation function
 const interpolateColor = (ratio: number): string => {
-  // Color stops: red -> orange -> yellow -> light green -> green
-  const colors = [
-    { r: 255, g: 0, b: 0 },     // Red (0%)
-    { r: 255, g: 165, b: 0 },   // Orange (25%)
-    { r: 255, g: 255, b: 0 },   // Yellow (50%)
-    { r: 173, g: 255, b: 47 },  // Green Yellow (75%)
-    { r: 0, g: 255, b: 0 }      // Green (100%)
-  ];
+  // Use theme colors: soft orange to glow orange gradient
+  const startColor = { r: 191, g: 120, b: 64 };  // vibe-soft-orange equivalent
+  const endColor = { r: 242, g: 153, b: 74 };    // vibe-glow-orange equivalent
   
-  const scaledRatio = ratio * (colors.length - 1);
-  const index = Math.floor(scaledRatio);
-  const remainder = scaledRatio - index;
-  
-  if (index >= colors.length - 1) {
-    const color = colors[colors.length - 1];
-    return `#${color.r.toString(16).padStart(2, '0')}${color.g.toString(16).padStart(2, '0')}${color.b.toString(16).padStart(2, '0')}`;
-  }
-  
-  const start = colors[index];
-  const end = colors[index + 1];
-  
-  const r = Math.round(start.r + (end.r - start.r) * remainder);
-  const g = Math.round(start.g + (end.g - start.g) * remainder);
-  const b = Math.round(start.b + (end.b - start.b) * remainder);
+  const r = Math.round(startColor.r + (endColor.r - startColor.r) * ratio);
+  const g = Math.round(startColor.g + (endColor.g - startColor.g) * ratio);
+  const b = Math.round(startColor.b + (endColor.b - startColor.b) * ratio);
   
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 };
@@ -60,13 +43,13 @@ const SatisfactionPage = () => {
     if (Math.abs(newRatio - satisfactionRatio) > 0.01) { // Only update if significant change
       setSatisfactionRatio(newRatio);
       spawnEmojis(newRatio);
-      SoundPlayer.playZipSound();
+      // Removed zip sound effect
     }
   };
 
   const spawnEmojis = (ratio: number) => {
     const emoji = getEmojiForRatio(ratio);
-    const count = Math.max(1, Math.floor(ratio * 5) + 1);
+    const count = Math.max(1, Math.floor(ratio * 2) + 1); // Reduced from * 5 to * 2
 
     const newEmojis = [];
     for (let i = 0; i < count; i++) {
@@ -80,10 +63,10 @@ const SatisfactionPage = () => {
 
     setEmojis(prev => [...prev, ...newEmojis]);
 
-    // Remove emojis after animation
+    // Remove emojis faster - reduced from 2000ms to 1000ms
     setTimeout(() => {
       setEmojis(prev => prev.filter(e => !newEmojis.includes(e)));
-    }, 2000);
+    }, 1000);
   };
 
   const goToNextPage = () => {
@@ -147,7 +130,7 @@ const SatisfactionPage = () => {
               y: emoji.y - 150,
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 2 }}
+            transition={{ duration: 1 }}
             className="fixed z-30 text-4xl pointer-events-none"
           >
             {emoji.emoji}
@@ -181,11 +164,8 @@ const SatisfactionPage = () => {
               className="relative h-16 rounded-full cursor-pointer border-4 border-vibe-glow-orange"
               style={{
                 background: `linear-gradient(to right, 
-                  #ff0000 0%, 
-                  #ffa500 25%, 
-                  #ffff00 50%, 
-                  #adff2f 75%, 
-                  #00ff00 100%)`
+                  hsl(var(--vibe-soft-orange)) 0%, 
+                  hsl(var(--vibe-glow-orange)) 100%)`
               }}
               onMouseDown={() => setIsDragging(true)}
               onMouseUp={() => setIsDragging(false)}

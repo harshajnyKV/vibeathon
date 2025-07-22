@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import BackgroundMusic from "@/components/BackgroundMusic";
 
 const Landing = () => {
   const [showHeading, setShowHeading] = useState(true);
@@ -33,6 +34,10 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen grainy-bg flex items-center justify-center relative overflow-hidden">
+      {/* Background Music Control - Fixed position */}
+      <div className="fixed top-6 right-6 z-50">
+        <BackgroundMusic />
+      </div>
       {/* Main heading */}
       {showHeading && (
         <h1 className={`text-6xl md:text-8xl font-dancing text-vibe-warm-brown text-center fade-in ${!showHeading ? 'fade-out' : ''}`}>
