@@ -39,31 +39,34 @@ const mockMoodData = [
   { name: 'Joy', value: 10, color: '#06b6d4' },
 ];
 
-const mockEnergyData = [
-  { day: 'Mon', energy: 3.2 },
-  { day: 'Tue', energy: 3.8 },
-  { day: 'Wed', energy: 2.9 },
-  { day: 'Thu', energy: 4.1 },
-  { day: 'Fri', energy: 3.7 },
-  { day: 'Sat', energy: 4.5 },
-  { day: 'Sun', energy: 4.2 },
-];
+// Function to generate week data based on selected date
+const generateWeekData = (selectedDate: Date, dataType: 'energy' | 'satisfaction') => {
+  const startOfWeek = new Date(selectedDate);
+  const day = startOfWeek.getDay();
+  const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Get Monday
+  startOfWeek.setDate(diff);
+
+  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const baseEnergyValues = [3.2, 3.8, 2.9, 4.1, 3.7, 4.5, 4.2];
+  const baseSatisfactionValues = [3.5, 4.1, 3.8, 4.3, 4.0, 4.2, 4.5];
+
+  return weekDays.map((dayName, index) => {
+    const currentDate = new Date(startOfWeek);
+    currentDate.setDate(startOfWeek.getDate() + index);
+    const formattedDate = format(currentDate, 'MMM dd');
+    
+    return {
+      day: `${dayName} (${formattedDate})`,
+      [dataType]: dataType === 'energy' ? baseEnergyValues[index] : baseSatisfactionValues[index]
+    };
+  });
+};
 
 const mockTaskComplexity = [
   { name: 'Easy', count: 45 },
   { name: 'Medium', count: 32 },
   { name: 'Hard', count: 18 },
   { name: 'Super Hard', count: 5 },
-];
-
-const mockSatisfactionData = [
-  { day: 'Mon', satisfaction: 3.5 },
-  { day: 'Tue', satisfaction: 4.1 },
-  { day: 'Wed', satisfaction: 3.8 },
-  { day: 'Thu', satisfaction: 4.3 },
-  { day: 'Fri', satisfaction: 4.0 },
-  { day: 'Sat', satisfaction: 4.2 },
-  { day: 'Sun', satisfaction: 4.5 },
 ];
 
 const AdminPage = () => {
@@ -79,6 +82,10 @@ const AdminPage = () => {
   const [selectedSatisfactionDate, setSelectedSatisfactionDate] = useState<Date | undefined>(new Date());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // Generate dynamic data based on selected dates
+  const energyData = generateWeekData(selectedEnergyDate || new Date(), 'energy');
+  const satisfactionData = generateWeekData(selectedSatisfactionDate || new Date(), 'satisfaction');
 
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -271,7 +278,7 @@ const AdminPage = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockEnergyData}>
+                  <LineChart data={energyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--vibe-glass-border))" />
                     <XAxis 
                       dataKey="day" 
@@ -373,7 +380,7 @@ const AdminPage = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={mockSatisfactionData}>
+                  <BarChart data={satisfactionData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--vibe-glass-border))" />
                     <XAxis 
                       dataKey="day" 
@@ -630,7 +637,7 @@ const AdminPage = () => {
                   <CardContent>
                     <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={mockEnergyData}>
+                        <LineChart data={energyData}>
                           <Line 
                             type="monotone" 
                             dataKey="energy" 

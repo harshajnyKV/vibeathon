@@ -63,20 +63,20 @@ const DashboardPage = () => {
   };
 
   const getMoodColor = (mood: number) => {
-    // Using theme colors instead of fixed colors
+    // Using theme colors
     switch (mood) {
-      case 1: return 'hsl(0 65% 55%)'; // destructive
-      case 2: return 'hsl(15 80% 60%)'; // orange
-      case 3: return 'hsl(45 55% 75%)'; // accent
-      case 4: return 'hsl(25 45% 60%)'; // primary
-      case 5: return 'hsl(25 85% 60%)'; // bright primary
-      default: return 'hsl(var(--muted))';
+      case 1: return 'hsl(0 65% 55%)'; // red for angry
+      case 2: return 'hsl(15 80% 60%)'; // orange for sad
+      case 3: return 'hsl(var(--vibe-warm-brown))'; // brown for neutral
+      case 4: return 'hsl(var(--vibe-soft-orange))'; // soft orange for good
+      case 5: return 'hsl(var(--vibe-glow-orange))'; // bright orange for joy
+      default: return 'hsl(var(--vibe-warm-brown))';
     }
   };
 
   const getEnergyColor = (energy: number) => {
     const intensity = energy / 5;
-    return `hsl(25 85% 60% / ${intensity})`;
+    return `hsl(var(--vibe-soft-orange) / ${intensity})`;
   };
 
   const monthNames = [
@@ -106,31 +106,31 @@ const DashboardPage = () => {
   const energyLabels = ['Very Low', 'Low', 'Average', 'Good', 'Max'];
 
   return (
-    <div className="min-h-screen relative p-6">
+    <div className="min-h-screen grainy-bg relative p-6">
       {/* Header */}
       <div className="relative z-10 flex justify-between items-center mb-8">
         <div className="flex items-center space-x-4">
           <button 
             onClick={goBack}
-            className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
+            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
           >
-            <ArrowLeft className="w-6 h-6 text-foreground" />
+            <ArrowLeft className="w-6 h-6 text-vibe-warm-brown" />
           </button>
-          <h1 className="text-4xl font-cursive font-bold text-foreground">
+          <h1 className="text-4xl font-dancing font-bold text-vibe-warm-brown">
             Dashboard
           </h1>
         </div>
         <div className="flex space-x-4">
           <button 
-            className="p-3 glass rounded-full bg-accent/20"
+            className="p-3 glass-modal rounded-full bg-vibe-soft-orange/20"
           >
-            <BarChart3 className="w-6 h-6 text-foreground" />
+            <BarChart3 className="w-6 h-6 text-vibe-warm-brown" />
           </button>
           <button 
             onClick={goToProfile}
-            className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
+            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
           >
-            <User className="w-6 h-6 text-foreground" />
+            <User className="w-6 h-6 text-vibe-warm-brown" />
           </button>
         </div>
       </div>
@@ -143,10 +143,10 @@ const DashboardPage = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="glass rounded-2xl p-6"
+          className="glass-modal border-vibe-glass-border rounded-2xl p-6"
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-cursive font-bold text-foreground">
+            <h3 className="text-2xl font-dancing font-bold text-vibe-warm-brown">
               Mood Chart
             </h3>
             <div className="flex items-center space-x-2">
@@ -172,7 +172,7 @@ const DashboardPage = () => {
             </div>
           </div>
           
-          <div className="flex justify-around items-end h-64 border-b border-border">
+                      <div className="flex justify-around items-end h-64 border-b border-vibe-glass-border">
             {moodData.map((day, index) => (
               <motion.div 
                 key={index} 
@@ -190,8 +190,8 @@ const DashboardPage = () => {
                     backgroundColor: getMoodColor(day.mood)
                   }}
                 />
-                <span className="text-sm text-muted-foreground">{day.day}</span>
-                <span className="text-xs text-muted-foreground">{day.date}</span>
+                <span className="text-sm text-vibe-warm-brown">{day.day}</span>
+                <span className="text-xs text-vibe-warm-brown/70">{day.date}</span>
               </motion.div>
             ))}
           </div>
@@ -202,10 +202,10 @@ const DashboardPage = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="glass rounded-2xl p-6"
+          className="glass-modal border-vibe-glass-border rounded-2xl p-6"
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-cursive font-bold text-foreground">
+            <h3 className="text-2xl font-dancing font-bold text-vibe-warm-brown">
               Energy Map
             </h3>
             <div className="flex items-center space-x-2">
@@ -235,12 +235,12 @@ const DashboardPage = () => {
             {heatMapData.slice(0, 49).map((day, index) => (
               <motion.div
                 key={index}
-                className="w-6 h-6 rounded-sm cursor-pointer hover:ring-2 hover:ring-primary relative group"
+                className="w-6 h-6 rounded-sm cursor-pointer hover:ring-2 hover:ring-vibe-soft-orange relative group"
                 style={{ backgroundColor: getEnergyColor(day.energy) }}
                 title={`${day.date}: ${day.log}`}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ 
-                  scale: [0, 1.2, 1],
+                  scale: 1,
                   opacity: 1 
                 }}
                 transition={{ 
@@ -250,14 +250,14 @@ const DashboardPage = () => {
                   stiffness: 300
                 }}
               >
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground">
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-vibe-warm-brown">
                   {day.displayDate}
                 </span>
               </motion.div>
             ))}
           </div>
           
-          <div className="flex justify-between items-center text-xs text-muted-foreground">
+          <div className="flex justify-between items-center text-xs text-vibe-warm-brown/70">
             <span>Less</span>
             <div className="flex space-x-1">
               {[1, 2, 3, 4, 5].map(level => (
@@ -277,9 +277,9 @@ const DashboardPage = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="glass rounded-2xl p-6"
+          className="glass-modal border-vibe-glass-border rounded-2xl p-6"
         >
-          <h3 className="text-2xl font-cursive font-bold text-foreground mb-4">
+          <h3 className="text-2xl font-dancing font-bold text-vibe-warm-brown mb-4">
             Complexity vs Satisfaction
           </h3>
           
@@ -293,7 +293,7 @@ const DashboardPage = () => {
                   y1={220 - (y * 40)} 
                   x2="90%" 
                   y2={220 - (y * 40)}
-                  stroke="hsl(var(--border))" 
+                  stroke="hsl(var(--vibe-glass-border))" 
                   strokeDasharray="2,2"
                 />
               ))}
@@ -301,7 +301,7 @@ const DashboardPage = () => {
               {/* Animated Line chart */}
               <motion.polyline
                 fill="none"
-                stroke="hsl(var(--primary))"
+                stroke="hsl(var(--vibe-glow-orange))"
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -320,8 +320,8 @@ const DashboardPage = () => {
                   cx={80 + (i * 60)}
                   cy={220 - (d.satisfaction * 40)}
                   r="6"
-                  fill="hsl(var(--primary))"
-                  className="hover:r-8 transition-all cursor-pointer"
+                  fill="hsl(var(--vibe-soft-orange))"
+                  className="transition-all cursor-pointer hover:opacity-80"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.7 + (i * 0.1), type: "spring" }}
@@ -329,14 +329,14 @@ const DashboardPage = () => {
               ))}
               
               {/* Y-axis labels */}
-              <text x="30" y="30" className="text-sm fill-muted-foreground">5</text>
-              <text x="30" y="70" className="text-sm fill-muted-foreground">4</text>
-              <text x="30" y="110" className="text-sm fill-muted-foreground">3</text>
-              <text x="30" y="150" className="text-sm fill-muted-foreground">2</text>
-              <text x="30" y="190" className="text-sm fill-muted-foreground">1</text>
+              <text x="30" y="30" className="text-sm" fill="hsl(var(--vibe-warm-brown))">5</text>
+              <text x="30" y="70" className="text-sm" fill="hsl(var(--vibe-warm-brown))">4</text>
+              <text x="30" y="110" className="text-sm" fill="hsl(var(--vibe-warm-brown))">3</text>
+              <text x="30" y="150" className="text-sm" fill="hsl(var(--vibe-warm-brown))">2</text>
+              <text x="30" y="190" className="text-sm" fill="hsl(var(--vibe-warm-brown))">1</text>
             </svg>
             
-            <div className="flex justify-between mt-2 px-16 text-sm text-muted-foreground">
+            <div className="flex justify-between mt-2 px-16 text-sm text-vibe-warm-brown/70">
               {complexityLabels.map((label, index) => (
                 <span key={index} className="text-center">{label}</span>
               ))}
@@ -349,9 +349,9 @@ const DashboardPage = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="glass rounded-2xl p-6"
+          className="glass-modal border-vibe-glass-border rounded-2xl p-6"
         >
-          <h3 className="text-2xl font-cursive font-bold text-foreground mb-4">
+          <h3 className="text-2xl font-dancing font-bold text-vibe-warm-brown mb-4">
             Energy vs Satisfaction
           </h3>
           
@@ -365,7 +365,7 @@ const DashboardPage = () => {
                   y1={220 - (y * 40)} 
                   x2="90%" 
                   y2={220 - (y * 40)}
-                  stroke="hsl(var(--border))" 
+                  stroke="hsl(var(--vibe-glass-border))" 
                   strokeDasharray="2,2"
                 />
               ))}
@@ -373,7 +373,7 @@ const DashboardPage = () => {
               {/* Animated Line chart */}
               <motion.polyline
                 fill="none"
-                stroke="hsl(var(--accent))"
+                stroke="hsl(var(--vibe-soft-orange))"
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -392,8 +392,8 @@ const DashboardPage = () => {
                   cx={80 + (i * 50)}
                   cy={220 - (d.satisfaction * 40)}
                   r="6"
-                  fill="hsl(var(--accent))"
-                  className="hover:r-8 transition-all cursor-pointer"
+                  fill="hsl(var(--vibe-glow-orange))"
+                  className="transition-all cursor-pointer hover:opacity-80"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.9 + (i * 0.1), type: "spring" }}
@@ -401,14 +401,14 @@ const DashboardPage = () => {
               ))}
               
               {/* Y-axis labels */}
-              <text x="30" y="30" className="text-sm fill-muted-foreground">5</text>
-              <text x="30" y="70" className="text-sm fill-muted-foreground">4</text>
-              <text x="30" y="110" className="text-sm fill-muted-foreground">3</text>
-              <text x="30" y="150" className="text-sm fill-muted-foreground">2</text>
-              <text x="30" y="190" className="text-sm fill-muted-foreground">1</text>
+              <text x="30" y="30" className="text-sm" fill="hsl(var(--vibe-warm-brown))">5</text>
+              <text x="30" y="70" className="text-sm" fill="hsl(var(--vibe-warm-brown))">4</text>
+              <text x="30" y="110" className="text-sm" fill="hsl(var(--vibe-warm-brown))">3</text>
+              <text x="30" y="150" className="text-sm" fill="hsl(var(--vibe-warm-brown))">2</text>
+              <text x="30" y="190" className="text-sm" fill="hsl(var(--vibe-warm-brown))">1</text>
             </svg>
             
-            <div className="flex justify-between mt-2 px-16 text-sm text-muted-foreground">
+            <div className="flex justify-between mt-2 px-16 text-sm text-vibe-warm-brown/70">
               {energyLabels.map((label, index) => (
                 <span key={index} className="text-center">{label}</span>
               ))}
