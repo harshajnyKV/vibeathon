@@ -152,7 +152,7 @@ const SatisfactionPage = () => {
             
             <div 
               ref={zipRef}
-              className="relative h-16 bg-gradient-to-r from-red-300 via-yellow-300 to-green-300 rounded-full cursor-pointer border-4 border-primary"
+              className="relative h-16 bg-vibe-soft-orange rounded-full cursor-pointer border-4 border-vibe-glow-orange"
               onMouseDown={() => setIsDragging(true)}
               onMouseUp={() => setIsDragging(false)}
               onMouseLeave={() => setIsDragging(false)}
