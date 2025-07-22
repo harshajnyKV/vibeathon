@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, BarChart3, User } from "lucide-react";
+import UserSettings from "@/components/UserSettings";
 
 const Log = () => {
   const [logText, setLogText] = useState("");
   const [isLogSet, setIsLogSet] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleSetLog = () => {
@@ -34,17 +37,26 @@ const Log = () => {
           Vibe
         </h1>
         <div className="flex gap-4">
-          <Button 
+          <button 
             onClick={() => navigate("/dashboard")}
-            variant="ghost" 
-            size="icon" 
-            className="text-vibe-warm-brown hover:text-vibe-glow-orange"
+            className="p-3 glass-modal rounded-full bg-vibe-soft-orange/20 hover:bg-vibe-glow-orange/20 transition-colors"
           >
-            <BarChart3 className="h-6 w-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown hover:text-vibe-glow-orange">
-            <User className="h-6 w-6" />
-          </Button>
+            <BarChart3 className="w-6 h-6 text-vibe-warm-brown" />
+          </button>
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors relative overflow-hidden"
+          >
+            {profileImageUrl ? (
+              <img 
+                src={profileImageUrl} 
+                alt="Profile" 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <User className="w-6 h-6 text-vibe-warm-brown" />
+            )}
+          </button>
         </div>
       </div>
 

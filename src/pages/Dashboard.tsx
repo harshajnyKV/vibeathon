@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, BarChart3, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import UserSettings from '@/components/UserSettings';
 
 // Mock data - in real app this would come from API/context
 const moodData = [
@@ -30,36 +31,99 @@ const energySatisfactionData = [
   { energy: 5, satisfaction: 5 },
 ];
 
-// Generate heat map data for the past 6 months
-const generateHeatMapData = () => {
+// Generate heat map data for the entire year
+const generateYearHeatMapData = () => {
   const data = [];
-  const today = new Date();
-  for (let i = 180; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    data.push({
-      date: date.toISOString().split('T')[0],
-      displayDate: date.getDate().toString().padStart(2, '0'),
-      energy: Math.floor(Math.random() * 5) + 1,
-      log: `Day ${180 - i}: Had a productive day with moderate energy levels.`
-    });
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+  const currentDay = currentDate.getDate();
+  
+  // Sample log entries for variety
+  const sampleLogs = [
+    "Had a productive morning meeting with the team. Feeling energized!",
+    "Completed the quarterly report. Satisfied with the progress.",
+    "Challenging day with multiple deadlines but managed well.",
+    "Great team collaboration on the new project. High energy!",
+    "Focused coding session. Made significant progress on features.",
+    "Attended training workshop. Learned new techniques.",
+    "Slow start but picked up momentum by afternoon.",
+    "Excellent presentation today. Client was very impressed.",
+    "Working from home was peaceful and productive.",
+    "Tough debugging session but finally solved the issue.",
+    "Team lunch and brainstorming session was inspiring.",
+    "Handled customer support efficiently. Good problem-solving.",
+    "Research and planning for next sprint. Strategic thinking.",
+    "Code review session with junior developers. Mentoring day.",
+    "Successfully deployed new features. No issues!",
+    "Creativity flowing well during design session.",
+    "Efficient day with good time management.",
+    "Collaborative work with designers on UI improvements.",
+    "Data analysis revealed interesting insights.",
+    "End-of-week retrospective. Planning improvements."
+  ];
+  
+  // Generate data for all 12 months
+  for (let month = 0; month < 12; month++) {
+    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentYear, month, day);
+      const isPastDate = month < currentMonth || (month === currentMonth && day <= currentDay);
+      
+      // Generate realistic log entry for past dates
+      const energy = isPastDate ? Math.floor(Math.random() * 5) + 1 : 0;
+      const logEntry = isPastDate 
+        ? sampleLogs[Math.floor(Math.random() * sampleLogs.length)]
+        : '';
+      
+      data.push({
+        date: date.toISOString().split('T')[0],
+        month: date.toLocaleString('default', { month: 'short' }),
+        day: day,
+        energy: energy,
+        log: logEntry,
+        isPastDate,
+        formattedDate: date.toLocaleDateString('en-US', { 
+          weekday: 'short', 
+          month: 'short', 
+          day: 'numeric' 
+        })
+      });
+    }
   }
   return data;
 };
 
-const heatMapData = generateHeatMapData();
+const yearHeatMapData = generateYearHeatMapData();
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [showSettings, setShowSettings] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [currentMonthGroup, setCurrentMonthGroup] = useState(0);
 
   const goBack = () => {
     navigate('/mood');
   };
 
-  const goToProfile = () => {
-    navigate('/profile');
+  const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthsPerGroup = 5;
+  const totalGroups = Math.ceil(allMonths.length / monthsPerGroup);
+  
+  const getCurrentMonths = () => {
+    const startIndex = currentMonthGroup * monthsPerGroup;
+    return allMonths.slice(startIndex, startIndex + monthsPerGroup);
+  };
+
+  const navigateMonthGroup = (direction: 'prev' | 'next') => {
+    if (direction === 'prev' && currentMonthGroup > 0) {
+      setCurrentMonthGroup(currentMonthGroup - 1);
+    } else if (direction === 'next' && currentMonthGroup < totalGroups - 1) {
+      setCurrentMonthGroup(currentMonthGroup + 1);
+    }
   };
 
   const getMoodColor = (mood: number) => {
@@ -127,10 +191,18 @@ const DashboardPage = () => {
             <BarChart3 className="w-6 h-6 text-vibe-warm-brown" />
           </button>
           <button 
-            onClick={goToProfile}
-            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
+            onClick={() => setShowSettings(true)}
+            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors relative overflow-hidden"
           >
-            <User className="w-6 h-6 text-vibe-warm-brown" />
+            {profileImageUrl ? (
+              <img 
+                src={profileImageUrl} 
+                alt="Profile" 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <User className="w-6 h-6 text-vibe-warm-brown" />
+            )}
           </button>
         </div>
       </div>
@@ -212,18 +284,20 @@ const DashboardPage = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => changeMonth('prev')}
+                onClick={() => navigateMonthGroup('prev')}
+                disabled={currentMonthGroup === 0}
                 className="p-1"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
               <span className="text-sm font-medium min-w-[120px] text-center">
-                {monthNames[currentMonth]} {currentYear}
+                {getCurrentMonths()[0]} - {getCurrentMonths()[getCurrentMonths().length - 1]} {currentYear}
               </span>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => changeMonth('next')}
+                onClick={() => navigateMonthGroup('next')}
+                disabled={currentMonthGroup === totalGroups - 1}
                 className="p-1"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -231,30 +305,47 @@ const DashboardPage = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-7 gap-1 h-48 overflow-auto mb-4">
-            {heatMapData.slice(0, 49).map((day, index) => (
-              <motion.div
-                key={index}
-                className="w-6 h-6 rounded-sm cursor-pointer hover:ring-2 hover:ring-vibe-soft-orange relative group"
-                style={{ backgroundColor: getEnergyColor(day.energy) }}
-                title={`${day.date}: ${day.log}`}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ 
-                  scale: 1,
-                  opacity: 1 
-                }}
-                transition={{ 
-                  delay: index * 0.02,
-                  duration: 0.3,
-                  type: "spring",
-                  stiffness: 300
-                }}
-              >
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-vibe-warm-brown">
-                  {day.displayDate}
-                </span>
-              </motion.div>
-            ))}
+                    <div className="h-80 overflow-auto mb-4 p-4">
+            {/* Heatmap with Headers */}
+            <div className="flex gap-4">
+              {getCurrentMonths().map((monthName, monthIndex) => (
+                <div key={monthName} className="flex flex-col">
+                  {/* Month Header */}
+                  <div className="text-sm text-vibe-warm-brown/70 font-medium text-center mb-3">
+                    {monthName}
+                  </div>
+                  
+                  {/* Month Grid */}
+                  <div className="grid grid-cols-7 gap-1" style={{ gridGap: '2px' }}>
+                    {yearHeatMapData
+                      .filter(day => day.month === monthName)
+                      .map((day, dayIndex) => (
+                        <motion.div
+                          key={`${monthName}-${dayIndex}`}
+                          className="w-5 h-5 cursor-pointer hover:outline hover:outline-2 hover:outline-vibe-soft-orange relative group"
+                          style={{ 
+                            backgroundColor: day.isPastDate ? getEnergyColor(day.energy) : '#e5e5e5',
+                            borderRadius: '3px',
+                            opacity: day.isPastDate ? 1 : 0.4
+                          }}
+                          title={day.isPastDate ? `${day.formattedDate}\nEnergy: ${day.energy}/5\n\n"${day.log}"` : `${day.formattedDate}\nNo data yet - future date`}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ 
+                            scale: 1,
+                            opacity: day.isPastDate ? 1 : 0.4
+                          }}
+                          transition={{ 
+                            delay: dayIndex * 0.005,
+                            duration: 0.3,
+                            type: "spring",
+                            stiffness: 400
+                          }}
+                        />
+                      ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           
           <div className="flex justify-between items-center text-xs text-vibe-warm-brown/70">
@@ -417,6 +508,13 @@ const DashboardPage = () => {
         </motion.div>
 
       </div>
+
+      {/* User Settings Modal */}
+      <UserSettings 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+        onProfileImageChange={setProfileImageUrl}
+      />
     </div>
   );
 };

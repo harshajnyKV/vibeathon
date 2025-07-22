@@ -9,12 +9,15 @@ import { Label } from '@/components/ui/label';
 interface UserSettingsProps {
   isOpen: boolean;
   onClose: () => void;
+  onProfileImageChange?: (imageUrl: string) => void;
 }
 
-const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose }) => {
+const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose, onProfileImageChange }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [hasUnsavedPhoto, setHasUnsavedPhoto] = useState(false);
   const navigate = useNavigate();
 
   const handlePasswordUpdate = () => {
@@ -32,13 +35,35 @@ const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose }) => {
     const file = event.target.files?.[0];
     if (file) {
       setProfileImage(file);
-      // Simulate image upload
-      alert('Profile picture updated!');
+      // Create URL for the uploaded image preview
+      const imageUrl = URL.createObjectURL(file);
+      setProfileImageUrl(imageUrl);
+      // Mark as having unsaved changes
+      setHasUnsavedPhoto(true);
+    }
+  };
+
+  const handleSavePhoto = () => {
+    if (profileImageUrl && hasUnsavedPhoto) {
+      // Call parent callback to update the user icon
+      onProfileImageChange?.(profileImageUrl);
+      setHasUnsavedPhoto(false);
+      alert('Profile picture saved!');
     }
   };
 
   const handleLogout = () => {
     navigate('/');
+    onClose();
+  };
+
+  const handleClose = () => {
+    // Reset unsaved changes when closing
+    if (hasUnsavedPhoto) {
+      setHasUnsavedPhoto(false);
+      setProfileImageUrl(null);
+      setProfileImage(null);
+    }
     onClose();
   };
 
@@ -50,13 +75,13 @@ const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={onClose}
+          onClick={handleClose}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="glass-modal p-8 rounded-2xl max-w-md w-full mx-4"
+            className="bg-background/95 backdrop-blur-md border border-vibe-glass-border p-8 rounded-2xl max-w-md w-full mx-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -64,8 +89,8 @@ const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose }) => {
                 Settings
               </h3>
               <button
-                onClick={onClose}
-                className="p-2 glass-modal rounded-full hover:bg-vibe-glow-orange/20"
+                onClick={handleClose}
+                className="p-2 bg-background/80 border border-vibe-glass-border rounded-full hover:bg-vibe-glow-orange/20 transition-colors"
               >
                 <X className="w-5 h-5 text-vibe-warm-brown" />
               </button>
@@ -78,8 +103,23 @@ const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose }) => {
                   Profile Picture
                 </Label>
                 <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 rounded-full bg-vibe-soft-orange/30 flex items-center justify-center">
-                    <span className="text-2xl">👤</span>
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full bg-vibe-soft-orange/30 flex items-center justify-center overflow-hidden">
+                      {profileImageUrl ? (
+                        <img 
+                          src={profileImageUrl} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl">👤</span>
+                      )}
+                    </div>
+                    {hasUnsavedPhoto && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-vibe-glow-orange rounded-full flex items-center justify-center">
+                        <span className="text-xs text-white">!</span>
+                      </div>
+                    )}
                   </div>
                   <input
                     type="file"
@@ -88,15 +128,33 @@ const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose }) => {
                     className="hidden"
                     id="profile-upload"
                   />
-                  <Button
-                    onClick={() => document.getElementById('profile-upload')?.click()}
-                    variant="outline"
-                    className="border-vibe-glass-border"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Change Photo
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => document.getElementById('profile-upload')?.click()}
+                      variant="outline"
+                      className="border-vibe-glass-border"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Change Photo
+                    </Button>
+                    <Button
+                      onClick={handleSavePhoto}
+                      disabled={!hasUnsavedPhoto}
+                      className={`transition-all duration-200 ${
+                        hasUnsavedPhoto 
+                          ? 'bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white shadow-md hover:shadow-lg' 
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                      }`}
+                    >
+                      Save
+                    </Button>
+                  </div>
                 </div>
+                {hasUnsavedPhoto && (
+                  <p className="text-sm text-vibe-glow-orange mt-2">
+                    ⚠️ You have unsaved changes. Click "Save" to apply them.
+                  </p>
+                )}
               </div>
 
               {/* Password Change */}
@@ -110,14 +168,14 @@ const UserSettings: React.FC<UserSettingsProps> = ({ isOpen, onClose }) => {
                     placeholder="New password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="bg-background/50 border-vibe-glass-border"
+                    className="bg-background/90 border-vibe-glass-border"
                   />
                   <Input
                     type="password"
                     placeholder="Confirm new password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="bg-background/50 border-vibe-glass-border"
+                    className="bg-background/90 border-vibe-glass-border"
                   />
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BarChart3, User } from "lucide-react";
+import UserSettings from "@/components/UserSettings";
 
 const complexityLevels = [
   { id: 1, label: "Easy", value: 1, color: "bg-green-400" },
@@ -12,6 +13,8 @@ const complexityLevels = [
 
 const Complexity = () => {
   const [selectedComplexity, setSelectedComplexity] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleComplexitySelect = (id: number) => {
@@ -39,17 +42,26 @@ const Complexity = () => {
           Vibe
         </h1>
         <div className="flex gap-4">
-          <Button 
+          <button 
             onClick={() => navigate("/dashboard")}
-            variant="ghost" 
-            size="icon" 
-            className="text-vibe-warm-brown hover:text-vibe-glow-orange"
+            className="p-3 glass-modal rounded-full bg-vibe-soft-orange/20 hover:bg-vibe-glow-orange/20 transition-colors"
           >
-            <BarChart3 className="h-6 w-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown hover:text-vibe-glow-orange">
-            <User className="h-6 w-6" />
-          </Button>
+            <BarChart3 className="w-6 h-6 text-vibe-warm-brown" />
+          </button>
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="p-3 glass-modal rounded-full hover:bg-vibe-glow-orange/20 transition-colors relative overflow-hidden"
+          >
+            {profileImageUrl ? (
+              <img 
+                src={profileImageUrl} 
+                alt="Profile" 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <User className="w-6 h-6 text-vibe-warm-brown" />
+            )}
+          </button>
         </div>
       </div>
 
@@ -107,6 +119,13 @@ const Complexity = () => {
           </Button>
         )}
       </div>
+
+      {/* User Settings Modal */}
+      <UserSettings 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+        onProfileImageChange={setProfileImageUrl}
+      />
     </div>
   );
 };
