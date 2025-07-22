@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, BarChart3, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SoundPlayer } from '@/utils/sounds';
 
 const satisfactionEmojis = [
   { level: 1, emoji: '😭', count: 1 },
@@ -29,6 +30,7 @@ const SatisfactionPage = () => {
     if (level !== zipLevel && level >= 1 && level <= 5) {
       setZipLevel(level);
       spawnEmojis(level);
+      SoundPlayer.playZipSound();
     }
   };
 
@@ -160,7 +162,7 @@ const SatisfactionPage = () => {
             >
               {/* Zip puller */}
               <motion.div
-                className="absolute top-1/2 transform -translate-y-1/2 w-8 h-12 bg-primary rounded-lg cursor-grab active:cursor-grabbing shadow-lg border-2 border-primary-foreground"
+                className="absolute top-1/2 transform -translate-y-1/2 w-8 h-12 bg-vibe-glow-orange rounded-lg cursor-grab active:cursor-grabbing shadow-lg border-2 border-vibe-warm-brown"
                 style={{
                   left: `${(zipLevel / 5) * 100}%`,
                   transform: 'translateX(-50%) translateY(-50%)',

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BarChart3, User } from "lucide-react";
+import { SoundPlayer } from "@/utils/sounds";
 
 const energyLevels = [
   { clicks: 1, value: 1, label: "Very Low", intensity: 0.2 },
@@ -18,7 +19,9 @@ const Energy = () => {
 
   const handleSphereClick = () => {
     if (clickCount < 5) {
-      setClickCount(prev => prev + 1);
+      const newCount = clickCount + 1;
+      setClickCount(newCount);
+      SoundPlayer.playEnergySound(newCount);
     }
   };
 
