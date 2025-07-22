@@ -370,6 +370,8 @@ const AdminPage = () => {
                       onSelect={setSelectedMoodDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -441,6 +443,8 @@ const AdminPage = () => {
                       onSelect={setSelectedEnergyDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -505,6 +509,8 @@ const AdminPage = () => {
                       onSelect={setSelectedComplexityDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -565,6 +571,8 @@ const AdminPage = () => {
                       onSelect={setSelectedSatisfactionDate}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                      toDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
