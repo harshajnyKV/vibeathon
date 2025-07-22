@@ -1,6 +1,5 @@
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
@@ -32,11 +31,21 @@ const mockEmployeeSatisfactionData = [
   { day: 'Sun', satisfaction: 4.6 },
 ];
 
+// Mock employee data lookup
+const mockEmployees = [
+  { id: 1, name: 'John Doe', email: 'john@company.com', lastActive: '2024-01-15' },
+  { id: 2, name: 'Jane Smith', email: 'jane@company.com', lastActive: '2024-01-14' },
+  { id: 3, name: 'Mike Johnson', email: 'mike@company.com', lastActive: '2024-01-13' },
+  { id: 4, name: 'Sarah Wilson', email: 'sarah@company.com', lastActive: '2024-01-12' },
+  { id: 5, name: 'David Brown', email: 'david@company.com', lastActive: '2024-01-11' },
+  { id: 6, name: 'Emily Davis', email: 'emily@company.com', lastActive: '2024-01-10' },
+];
+
 const EmployeeDashboard = () => {
   const { id } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
-  const employee = location.state?.employee;
+  
+  const employee = mockEmployees.find(emp => emp.id === parseInt(id || ''));
 
   if (!employee) {
     return (

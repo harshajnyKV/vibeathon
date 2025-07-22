@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Upload, 
-  Search, 
   Users, 
   User, 
   LogOut, 
@@ -19,7 +18,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import { format } from 'date-fns';
 
 // Mock data for demonstrations
 const mockEmployees = [
@@ -65,21 +67,19 @@ const mockSatisfactionData = [
 ];
 
 const AdminPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [showEmployeeList, setShowEmployeeList] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showSearchModal, setShowSearchModal] = useState(false);
   const [showUserSettings, setShowUserSettings] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<typeof mockEmployees[0] | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const [selectedMoodDate, setSelectedMoodDate] = useState<Date | undefined>(new Date());
+  const [selectedEnergyDate, setSelectedEnergyDate] = useState<Date | undefined>(new Date());
+  const [selectedComplexityDate, setSelectedComplexityDate] = useState<Date | undefined>(new Date());
+  const [selectedSatisfactionDate, setSelectedSatisfactionDate] = useState<Date | undefined>(new Date());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const filteredEmployees = mockEmployees.filter(emp => 
-    emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    emp.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -136,13 +136,6 @@ const AdminPage = () => {
         </h1>
         <div className="flex space-x-4">
           <Button 
-            onClick={() => setShowSearchModal(true)}
-            className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
-          >
-            <Search className="w-4 h-4 mr-2" />
-            Search Employee
-          </Button>
-          <Button 
             onClick={() => navigate('/employee-list')}
             className="bg-vibe-soft-orange hover:bg-vibe-glow-orange text-white"
           >
@@ -190,11 +183,24 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Today's Mood Distribution
+                  Mood Distribution - {selectedMoodDate ? format(selectedMoodDate, 'MMM dd, yyyy') : 'Today'}
                 </span>
-                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
-                  <Calendar className="w-4 h-4" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                      <Calendar className="w-4 h-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedMoodDate}
+                      onSelect={setSelectedMoodDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -242,11 +248,24 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Weekly Energy Levels
+                  Energy Levels - Week of {selectedEnergyDate ? format(selectedEnergyDate, 'MMM dd, yyyy') : 'Today'}
                 </span>
-                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
-                  <Calendar className="w-4 h-4" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                      <Calendar className="w-4 h-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedEnergyDate}
+                      onSelect={setSelectedEnergyDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -283,11 +302,24 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Task Complexity Distribution
+                  Task Complexity - {selectedComplexityDate ? format(selectedComplexityDate, 'MMM dd, yyyy') : 'Today'}
                 </span>
-                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
-                  <Calendar className="w-4 h-4" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                      <Calendar className="w-4 h-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedComplexityDate}
+                      onSelect={setSelectedComplexityDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -318,11 +350,24 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="font-dancing text-vibe-warm-brown text-2xl">
-                  Weekly Satisfaction Levels
+                  Satisfaction Levels - Week of {selectedSatisfactionDate ? format(selectedSatisfactionDate, 'MMM dd, yyyy') : 'Today'}
                 </span>
-                <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
-                  <Calendar className="w-4 h-4" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="bg-background/50 border-vibe-glass-border">
+                      <Calendar className="w-4 h-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedSatisfactionDate}
+                      onSelect={setSelectedSatisfactionDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -362,66 +407,6 @@ const AdminPage = () => {
         </div>
       </div>
 
-      {/* Search Employee Modal */}
-      <AnimatePresence>
-        {showSearchModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-            onClick={() => setShowSearchModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="glass-modal p-8 rounded-2xl max-w-md w-full mx-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-dancing text-vibe-warm-brown">
-                  Search Employee
-                </h3>
-                <button
-                  onClick={() => setShowSearchModal(false)}
-                  className="p-2 glass-modal rounded-full hover:bg-vibe-glow-orange/20"
-                >
-                  <X className="w-5 h-5 text-vibe-warm-brown" />
-                </button>
-              </div>
-              <div className="space-y-4">
-                <Input
-                  placeholder="Search by name or email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-background/50 border-vibe-glass-border"
-                />
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {filteredEmployees.map((employee) => (
-                    <motion.div
-                      key={employee.id}
-                      whileHover={{ scale: 1.02 }}
-                      className="p-3 glass-modal rounded-lg border border-vibe-glass-border cursor-pointer"
-                      onClick={() => {
-                        setSelectedEmployee(employee);
-                        setShowSearchModal(false);
-                      }}
-                    >
-                      <div className="font-dancing text-vibe-warm-brown">
-                        {employee.name}
-                      </div>
-                      <div className="text-sm text-vibe-soft-orange">
-                        {employee.email}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Employee List Modal */}
       <AnimatePresence>

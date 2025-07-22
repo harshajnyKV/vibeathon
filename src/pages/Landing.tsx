@@ -14,12 +14,9 @@ const Landing = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowHeading(false);
-      setTimeout(() => setShowModal(true), 500);
-    }, 2000);
-
-    return () => clearTimeout(timer);
+    // Show login modal immediately
+    setShowModal(true);
+    setShowHeading(false);
   }, []);
 
   const handleLogin = () => {

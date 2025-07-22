@@ -25,7 +25,7 @@ const EmployeeList = () => {
   );
 
   const handleEmployeeClick = (employee: typeof mockEmployees[0]) => {
-    navigate(`/employee-dashboard/${employee.id}`, { state: { employee } });
+    navigate(`/employee-dashboard/${employee.id}`);
   };
 
   return (
