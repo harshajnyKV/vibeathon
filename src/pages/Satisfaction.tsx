@@ -3,19 +3,50 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, BarChart3, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SoundPlayer } from '@/utils/sounds';
+import BackgroundMusic from '@/components/BackgroundMusic';
 
-const satisfactionEmojis = [
-  { level: 1, emoji: '😭', count: 1 },
-  { level: 2, emoji: '😞', count: 2 },
-  { level: 3, emoji: '👍', count: 3 },
-  { level: 4, emoji: '😊', count: 4 },
-  { level: 5, emoji: '🤩', count: 5 },
-];
+// Color interpolation function
+const interpolateColor = (ratio: number): string => {
+  // Color stops: red -> orange -> yellow -> light green -> green
+  const colors = [
+    { r: 255, g: 0, b: 0 },     // Red (0%)
+    { r: 255, g: 165, b: 0 },   // Orange (25%)
+    { r: 255, g: 255, b: 0 },   // Yellow (50%)
+    { r: 173, g: 255, b: 47 },  // Green Yellow (75%)
+    { r: 0, g: 255, b: 0 }      // Green (100%)
+  ];
+  
+  const scaledRatio = ratio * (colors.length - 1);
+  const index = Math.floor(scaledRatio);
+  const remainder = scaledRatio - index;
+  
+  if (index >= colors.length - 1) {
+    const color = colors[colors.length - 1];
+    return `#${color.r.toString(16).padStart(2, '0')}${color.g.toString(16).padStart(2, '0')}${color.b.toString(16).padStart(2, '0')}`;
+  }
+  
+  const start = colors[index];
+  const end = colors[index + 1];
+  
+  const r = Math.round(start.r + (end.r - start.r) * remainder);
+  const g = Math.round(start.g + (end.g - start.g) * remainder);
+  const b = Math.round(start.b + (end.b - start.b) * remainder);
+  
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+};
+
+const getEmojiForRatio = (ratio: number): string => {
+  if (ratio < 0.2) return '😭';
+  if (ratio < 0.4) return '😞';
+  if (ratio < 0.6) return '👍';
+  if (ratio < 0.8) return '😊';
+  return '🤩';
+};
 
 const SatisfactionPage = () => {
-  const [zipLevel, setZipLevel] = useState(0);
+  const [satisfactionRatio, setSatisfactionRatio] = useState(0); // 0 to 1
   const [isDragging, setIsDragging] = useState(false);
-  const [emojis, setEmojis] = useState<Array<{ id: number; x: number; y: number; emoji: string; side: 'left' | 'right' }>>([]);
+  const [emojis, setEmojis] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
   const zipRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -24,38 +55,26 @@ const SatisfactionPage = () => {
 
     const rect = zipRef.current.getBoundingClientRect();
     const x = event.clientX - rect.left;
-    const progress = Math.max(0, Math.min(1, x / rect.width));
-    const level = Math.floor(progress * 5) + 1;
+    const newRatio = Math.max(0, Math.min(1, x / rect.width));
     
-    if (level !== zipLevel && level >= 1 && level <= 5) {
-      setZipLevel(level);
-      spawnEmojis(level);
+    if (Math.abs(newRatio - satisfactionRatio) > 0.01) { // Only update if significant change
+      setSatisfactionRatio(newRatio);
+      spawnEmojis(newRatio);
       SoundPlayer.playZipSound();
     }
   };
 
-  const spawnEmojis = (level: number) => {
-    const satisfactionData = satisfactionEmojis.find(s => s.level === level);
-    if (!satisfactionData) return;
+  const spawnEmojis = (ratio: number) => {
+    const emoji = getEmojiForRatio(ratio);
+    const count = Math.max(1, Math.floor(ratio * 5) + 1);
 
     const newEmojis = [];
-    for (let i = 0; i < satisfactionData.count; i++) {
-      // Left side emojis
+    for (let i = 0; i < count; i++) {
       newEmojis.push({
-        id: Date.now() + i * 2,
-        x: Math.random() * 200 + 50,
+        id: Date.now() + i,
+        x: Math.random() * (window.innerWidth - 100) + 50,
         y: Math.random() * 100 + 200,
-        emoji: satisfactionData.emoji,
-        side: 'left' as const,
-      });
-      
-      // Right side emojis
-      newEmojis.push({
-        id: Date.now() + i * 2 + 1,
-        x: Math.random() * 200 + window.innerWidth - 250,
-        y: Math.random() * 100 + 200,
-        emoji: satisfactionData.emoji,
-        side: 'right' as const,
+        emoji: emoji,
       });
     }
 
@@ -68,8 +87,10 @@ const SatisfactionPage = () => {
   };
 
   const goToNextPage = () => {
-    if (zipLevel > 0) {
-      navigate('/log');
+    if (satisfactionRatio > 0) {
+      // Pass the hex color and ratio to the next page
+      const hexColor = interpolateColor(satisfactionRatio);
+      navigate('/log', { state: { satisfactionColor: hexColor, satisfactionRatio } });
     }
   };
 
@@ -93,6 +114,7 @@ const SatisfactionPage = () => {
           Vibe
         </h1>
         <div className="flex space-x-4">
+          <BackgroundMusic />
           <button 
             onClick={goToDashboard}
             className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
@@ -143,18 +165,28 @@ const SatisfactionPage = () => {
           How satisfying was your day?
         </motion.h2>
 
-        {/* Zip Slider */}
+        {/* Color Slider */}
         <div className="relative w-full max-w-2xl px-8">
           <div className="mb-8">
             <div className="flex justify-between text-lg font-cursive text-foreground mb-4">
-              {[1, 2, 3, 4, 5].map(num => (
-                <span key={num} className="text-2xl font-bold">{num}</span>
-              ))}
+              <span className="text-2xl">😭</span>
+              <span className="text-2xl">😞</span>
+              <span className="text-2xl">👍</span>
+              <span className="text-2xl">😊</span>
+              <span className="text-2xl">🤩</span>
             </div>
             
             <div 
               ref={zipRef}
-              className="relative h-16 bg-vibe-soft-orange rounded-full cursor-pointer border-4 border-vibe-glow-orange"
+              className="relative h-16 rounded-full cursor-pointer border-4 border-vibe-glow-orange"
+              style={{
+                background: `linear-gradient(to right, 
+                  #ff0000 0%, 
+                  #ffa500 25%, 
+                  #ffff00 50%, 
+                  #adff2f 75%, 
+                  #00ff00 100%)`
+              }}
               onMouseDown={() => setIsDragging(true)}
               onMouseUp={() => setIsDragging(false)}
               onMouseLeave={() => setIsDragging(false)}
@@ -164,7 +196,7 @@ const SatisfactionPage = () => {
               <motion.div
                 className="absolute top-1/2 transform -translate-y-1/2 w-8 h-12 bg-vibe-glow-orange rounded-lg cursor-grab active:cursor-grabbing shadow-lg border-2 border-vibe-warm-brown"
                 style={{
-                  left: `${(zipLevel / 5) * 100}%`,
+                  left: `${satisfactionRatio * 100}%`,
                   transform: 'translateX(-50%) translateY(-50%)',
                 }}
                 animate={{
@@ -173,36 +205,28 @@ const SatisfactionPage = () => {
               >
                 <div className="w-full h-full bg-gradient-to-b from-white/30 to-transparent rounded-lg" />
               </motion.div>
-
-              {/* Zip teeth effect */}
-              <div className="absolute inset-0 overflow-hidden rounded-full">
-                <div 
-                  className="h-full bg-gradient-to-r from-background via-background to-transparent transition-all duration-300"
-                  style={{
-                    width: `${100 - (zipLevel / 5) * 100}%`,
-                    right: 0,
-                  }}
-                />
-              </div>
             </div>
           </div>
 
-          {zipLevel > 0 && (
+          {satisfactionRatio > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
               <p className="text-2xl font-cursive text-accent mb-4">
-                Satisfaction Level: {zipLevel}/5
+                Satisfaction: {Math.round(satisfactionRatio * 100)}%
               </p>
               <p className="text-lg text-muted-foreground">
-                {satisfactionEmojis.find(s => s.level === zipLevel)?.emoji} 
-                {zipLevel === 1 && " Very Unsatisfying"}
-                {zipLevel === 2 && " Somewhat Unsatisfying"}
-                {zipLevel === 3 && " Neutral"}
-                {zipLevel === 4 && " Satisfying"}
-                {zipLevel === 5 && " Extremely Satisfying"}
+                {getEmojiForRatio(satisfactionRatio)} 
+                {satisfactionRatio < 0.2 && " Very Unsatisfying"}
+                {satisfactionRatio >= 0.2 && satisfactionRatio < 0.4 && " Somewhat Unsatisfying"}
+                {satisfactionRatio >= 0.4 && satisfactionRatio < 0.6 && " Neutral"}
+                {satisfactionRatio >= 0.6 && satisfactionRatio < 0.8 && " Satisfying"}
+                {satisfactionRatio >= 0.8 && " Extremely Satisfying"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Color: {interpolateColor(satisfactionRatio)}
               </p>
             </motion.div>
           )}
@@ -223,7 +247,7 @@ const SatisfactionPage = () => {
         <ChevronLeft className="w-10 h-10 text-foreground" />
       </motion.button>
 
-      {zipLevel > 0 && (
+      {satisfactionRatio > 0 && (
         <motion.button
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
