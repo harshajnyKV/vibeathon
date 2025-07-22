@@ -120,36 +120,13 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
-    background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.25) 1px, transparent 0),
-      radial-gradient(circle at 2px 2px, hsl(var(--foreground) / 0.2) 0.8px, transparent 0),
-      radial-gradient(circle at 3px 3px, hsl(var(--foreground) / 0.15) 0.5px, transparent 0),
-      radial-gradient(circle at 4px 4px, hsl(var(--foreground) / 0.12) 0.6px, transparent 0),
-      radial-gradient(circle at 5px 5px, hsl(var(--foreground) / 0.1) 0.8px, transparent 0),
-      radial-gradient(circle at 6px 6px, hsl(var(--foreground) / 0.08) 0.4px, transparent 0),
-      radial-gradient(circle at 7px 7px, hsl(var(--foreground) / 0.06) 0.3px, transparent 0),
-      radial-gradient(circle at 8px 8px, hsl(var(--foreground) / 0.05) 0.7px, transparent 0),
-      radial-gradient(circle at 9px 9px, hsl(var(--foreground) / 0.04) 0.2px, transparent 0),
-      radial-gradient(circle at 10px 10px, hsl(var(--foreground) / 0.03) 0.5px, transparent 0);
-    background-size: 20px 20px, 12px 12px, 16px 16px, 8px 8px, 14px 14px, 6px 6px, 18px 18px, 10px 10px, 4px 4px, 22px 22px;
+    @apply text-foreground;
+    background: linear-gradient(135deg, hsl(200 50% 95%), hsl(220 30% 90%));
   }
 
-  /* Grainy texture overlay - Enhanced */
+  /* Simple soothing gradient background */
   .grainy-bg {
-    background-color: hsl(var(--vibe-oatmeal));
-    background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.25) 1px, transparent 0),
-      radial-gradient(circle at 2px 2px, hsl(var(--foreground) / 0.2) 0.8px, transparent 0),
-      radial-gradient(circle at 3px 3px, hsl(var(--foreground) / 0.15) 0.5px, transparent 0),
-      radial-gradient(circle at 4px 4px, hsl(var(--foreground) / 0.12) 0.6px, transparent 0),
-      radial-gradient(circle at 5px 5px, hsl(var(--foreground) / 0.1) 0.8px, transparent 0),
-      radial-gradient(circle at 6px 6px, hsl(var(--foreground) / 0.08) 0.4px, transparent 0),
-      radial-gradient(circle at 7px 7px, hsl(var(--foreground) / 0.06) 0.3px, transparent 0),
-      radial-gradient(circle at 8px 8px, hsl(var(--foreground) / 0.05) 0.7px, transparent 0),
-      radial-gradient(circle at 9px 9px, hsl(var(--foreground) / 0.04) 0.2px, transparent 0),
-      radial-gradient(circle at 10px 10px, hsl(var(--foreground) / 0.03) 0.5px, transparent 0);
-    background-size: 20px 20px, 12px 12px, 16px 16px, 8px 8px, 14px 14px, 6px 6px, 18px 18px, 10px 10px, 4px 4px, 22px 22px;
+    background: linear-gradient(135deg, hsl(200 50% 95%), hsl(220 30% 90%));
   }
 
   /* Glass morphism effect */
