@@ -1,266 +1,238 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ChevronLeft, BarChart3, User } from "lucide-react";
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, BarChart3, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const satisfactionLevels = [
-  { value: 1, emoji: "😭", label: "Very Dissatisfied" },
-  { value: 2, emoji: "👎", label: "Dissatisfied" },
-  { value: 3, emoji: "👍", label: "Satisfied" },
-  { value: 4, emoji: "😊", label: "Very Satisfied" },
-  { value: 5, emoji: "🤩", label: "Extremely Satisfied" },
+const satisfactionEmojis = [
+  { level: 1, emoji: '😭', count: 1 },
+  { level: 2, emoji: '😞', count: 2 },
+  { level: 3, emoji: '👍', count: 3 },
+  { level: 4, emoji: '😊', count: 4 },
+  { level: 5, emoji: '🤩', count: 5 },
 ];
 
-const Satisfaction = () => {
+const SatisfactionPage = () => {
   const [zipLevel, setZipLevel] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [floatingEmojis, setFloatingEmojis] = useState<Array<{id: number, emoji: string, x: number, y: number}>>([]);
-  const [emojiCounter, setEmojiCounter] = useState(0);
+  const [emojis, setEmojis] = useState<Array<{ id: number; x: number; y: number; emoji: string; side: 'left' | 'right' }>>([]);
   const zipRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    handleDrag(e);
-  };
+  const handleZipDrag = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !zipRef.current) return;
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      handleDrag(e);
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrag = (e: React.MouseEvent) => {
-    if (!zipRef.current) return;
-    
     const rect = zipRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const percentage = (x / rect.width) * 100;
-    const level = Math.ceil((percentage / 100) * 5);
+    const x = event.clientX - rect.left;
+    const progress = Math.max(0, Math.min(1, x / rect.width));
+    const level = Math.floor(progress * 5) + 1;
     
-    if (level !== zipLevel && level > 0) {
+    if (level !== zipLevel && level >= 1 && level <= 5) {
       setZipLevel(level);
+      spawnEmojis(level);
+    }
+  };
+
+  const spawnEmojis = (level: number) => {
+    const satisfactionData = satisfactionEmojis.find(s => s.level === level);
+    if (!satisfactionData) return;
+
+    const newEmojis = [];
+    for (let i = 0; i < satisfactionData.count; i++) {
+      // Left side emojis
+      newEmojis.push({
+        id: Date.now() + i * 2,
+        x: Math.random() * 200 + 50,
+        y: Math.random() * 100 + 200,
+        emoji: satisfactionData.emoji,
+        side: 'left' as const,
+      });
       
-      // Create floating emojis - number based on level, both sides
-      const currentLevel = satisfactionLevels[level - 1];
-      if (currentLevel) {
-        const numEmojis = level; // Number of emojis equals the level
-        const newEmojis = [];
-        
-        for (let i = 0; i < numEmojis; i++) {
-          // Left side emojis
-          newEmojis.push({
-            id: emojiCounter + i,
-            emoji: currentLevel.emoji,
-            x: x - 50 - (i * 30),
-            y: rect.top + rect.height / 2 - (i * 10),
-          });
-          
-          // Right side emojis
-          newEmojis.push({
-            id: emojiCounter + i + numEmojis,
-            emoji: currentLevel.emoji,
-            x: x + 50 + (i * 30),
-            y: rect.top + rect.height / 2 - (i * 10),
-          });
-        }
-        
-        setFloatingEmojis(prev => [...prev, ...newEmojis]);
-        setEmojiCounter(prev => prev + (numEmojis * 2));
-        
-        // Remove emojis after animation
-        setTimeout(() => {
-          setFloatingEmojis(prev => prev.filter(emoji => !newEmojis.some(newE => newE.id === emoji.id)));
-        }, 2000);
-      }
+      // Right side emojis
+      newEmojis.push({
+        id: Date.now() + i * 2 + 1,
+        x: Math.random() * 200 + window.innerWidth - 250,
+        y: Math.random() * 100 + 200,
+        emoji: satisfactionData.emoji,
+        side: 'right' as const,
+      });
+    }
+
+    setEmojis(prev => [...prev, ...newEmojis]);
+
+    // Remove emojis after animation
+    setTimeout(() => {
+      setEmojis(prev => prev.filter(e => !newEmojis.includes(e)));
+    }, 2000);
+  };
+
+  const goToNextPage = () => {
+    if (zipLevel > 0) {
+      navigate('/log');
     }
   };
 
-  const handlePrev = () => {
-    navigate("/complexity");
+  const goToPrevPage = () => {
+    navigate('/complexity');
   };
 
-  const handleComplete = () => {
-    // Navigate to log page
-    navigate("/log");
+  const goToDashboard = () => {
+    navigate('/dashboard');
   };
 
-  useEffect(() => {
-    const handleGlobalMouseUp = () => setIsDragging(false);
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (isDragging && zipRef.current) {
-        const rect = zipRef.current.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-        const percentage = (x / rect.width) * 100;
-        const level = Math.ceil((percentage / 100) * 5);
-        
-        if (level !== zipLevel && level > 0) {
-          setZipLevel(level);
-          
-          // Create floating emojis - number based on level, both sides
-          const currentLevel = satisfactionLevels[level - 1];
-          if (currentLevel) {
-            const numEmojis = level; // Number of emojis equals the level
-            const newEmojis = [];
-            
-            for (let i = 0; i < numEmojis; i++) {
-              // Left side emojis
-              newEmojis.push({
-                id: emojiCounter + i,
-                emoji: currentLevel.emoji,
-                x: x - 50 - (i * 30),
-                y: rect.top + rect.height / 2 - (i * 10),
-              });
-              
-              // Right side emojis
-              newEmojis.push({
-                id: emojiCounter + i + numEmojis,
-                emoji: currentLevel.emoji,
-                x: x + 50 + (i * 30),
-                y: rect.top + rect.height / 2 - (i * 10),
-              });
-            }
-            
-            setFloatingEmojis(prev => [...prev, ...newEmojis]);
-            setEmojiCounter(prev => prev + (numEmojis * 2));
-            
-            // Remove emojis after animation
-            setTimeout(() => {
-              setFloatingEmojis(prev => prev.filter(emoji => !newEmojis.some(newE => newE.id === emoji.id)));
-            }, 2000);
-          }
-        }
-      }
-    };
-
-    if (isDragging) {
-      document.addEventListener('mouseup', handleGlobalMouseUp);
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-    }
-
-    return () => {
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
-      document.removeEventListener('mousemove', handleGlobalMouseMove);
-    };
-  }, [isDragging, zipLevel, emojiCounter]);
+  const goToProfile = () => {
+    navigate('/profile');
+  };
 
   return (
-    <div className="min-h-screen grainy-bg relative overflow-hidden page-transition">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Header */}
-      <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
-        <h1 className="text-3xl font-dancing text-vibe-warm-brown">Vibe</h1>
-        <div className="flex gap-4">
-          <Button 
-            onClick={() => navigate("/dashboard")}
-            variant="ghost" 
-            size="icon" 
-            className="text-vibe-warm-brown hover:text-vibe-glow-orange"
+      <div className="relative z-10 p-6 flex justify-between items-center">
+        <h1 className="text-4xl font-cursive font-bold text-foreground">
+          Vibe
+        </h1>
+        <div className="flex space-x-4">
+          <button 
+            onClick={goToDashboard}
+            className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
           >
-            <BarChart3 className="h-6 w-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-vibe-warm-brown hover:text-vibe-glow-orange">
-            <User className="h-6 w-6" />
-          </Button>
+            <BarChart3 className="w-6 h-6 text-foreground" />
+          </button>
+          <button 
+            onClick={goToProfile}
+            className="p-3 glass rounded-full hover:bg-accent/20 transition-colors"
+          >
+            <User className="w-6 h-6 text-foreground" />
+          </button>
         </div>
       </div>
 
       {/* Floating Emojis */}
-      {floatingEmojis.map((emoji) => (
-        <div
-          key={emoji.id}
-          className="fixed text-4xl pointer-events-none z-20 animate-ping"
-          style={{
-            left: emoji.x,
-            top: emoji.y - 50,
-            animation: 'fadeInOut 2s ease-out forwards',
-          }}
-        >
-          {emoji.emoji}
-        </div>
-      ))}
+      <AnimatePresence>
+        {emojis.map((emoji) => (
+          <motion.div
+            key={emoji.id}
+            initial={{ 
+              opacity: 1, 
+              scale: 0.5,
+              x: emoji.x,
+              y: emoji.y,
+            }}
+            animate={{ 
+              opacity: 0, 
+              scale: 1.5,
+              y: emoji.y - 150,
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2 }}
+            className="fixed z-30 text-4xl pointer-events-none"
+          >
+            {emoji.emoji}
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-6">
-        <h2 className="text-5xl md:text-7xl font-dancing text-vibe-warm-brown text-center mb-20">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-120px)]">
+        <motion.h2 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-5xl md:text-6xl font-cursive font-bold text-foreground mb-16 text-center"
+        >
           How satisfying was your day?
-        </h2>
+        </motion.h2>
 
-        {/* Zip Control */}
-        <div className="w-full max-w-lg mb-12">
-          <div className="relative">
-            {/* Zip Track */}
-            <div
-              ref={zipRef}
-              className="relative h-16 bg-vibe-soft-orange/30 rounded-full border-4 border-vibe-soft-orange cursor-pointer overflow-hidden"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-            >
-              {/* Zip Fill */}
-              <div
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-vibe-soft-orange to-vibe-glow-orange transition-all duration-300 ease-out"
-                style={{ width: `${(zipLevel / 5) * 100}%` }}
-              />
-              
-              {/* Zip Numbers */}
-              {[1, 2, 3, 4, 5].map((num) => (
-                <div
-                  key={num}
-                  className="absolute top-1/2 transform -translate-y-1/2 text-white font-bold text-lg"
-                  style={{ left: `${((num - 1) / 4) * 100}%`, marginLeft: '8px' }}
-                >
-                  {num}
-                </div>
+        {/* Zip Slider */}
+        <div className="relative w-full max-w-2xl px-8">
+          <div className="mb-8">
+            <div className="flex justify-between text-lg font-cursive text-foreground mb-4">
+              {[1, 2, 3, 4, 5].map(num => (
+                <span key={num} className="text-2xl font-bold">{num}</span>
               ))}
-              
-              {/* Zip Handle */}
-              {zipLevel > 0 && (
-                <div
-                  className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full shadow-lg border-2 border-vibe-glow-orange"
-                  style={{ left: `${(zipLevel / 5) * 100}%` }}
+            </div>
+            
+            <div 
+              ref={zipRef}
+              className="relative h-16 bg-gradient-to-r from-red-300 via-yellow-300 to-green-300 rounded-full cursor-pointer border-4 border-primary"
+              onMouseDown={() => setIsDragging(true)}
+              onMouseUp={() => setIsDragging(false)}
+              onMouseLeave={() => setIsDragging(false)}
+              onMouseMove={handleZipDrag}
+            >
+              {/* Zip puller */}
+              <motion.div
+                className="absolute top-1/2 transform -translate-y-1/2 w-8 h-12 bg-primary rounded-lg cursor-grab active:cursor-grabbing shadow-lg border-2 border-primary-foreground"
+                style={{
+                  left: `${(zipLevel / 5) * 100}%`,
+                  transform: 'translateX(-50%) translateY(-50%)',
+                }}
+                animate={{
+                  scale: isDragging ? 1.1 : 1,
+                }}
+              >
+                <div className="w-full h-full bg-gradient-to-b from-white/30 to-transparent rounded-lg" />
+              </motion.div>
+
+              {/* Zip teeth effect */}
+              <div className="absolute inset-0 overflow-hidden rounded-full">
+                <div 
+                  className="h-full bg-gradient-to-r from-background via-background to-transparent transition-all duration-300"
+                  style={{
+                    width: `${100 - (zipLevel / 5) * 100}%`,
+                    right: 0,
+                  }}
                 />
-              )}
+              </div>
             </div>
           </div>
 
-          {/* Satisfaction Level Display */}
           {zipLevel > 0 && (
-            <div className="text-center mt-8">
-              <div className="text-6xl mb-4">{satisfactionLevels[zipLevel - 1]?.emoji}</div>
-              <p className="text-2xl font-dancing text-vibe-warm-brown">
-                {satisfactionLevels[zipLevel - 1]?.label}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <p className="text-2xl font-cursive text-accent mb-4">
+                Satisfaction Level: {zipLevel}/5
               </p>
-            </div>
+              <p className="text-lg text-muted-foreground">
+                {satisfactionEmojis.find(s => s.level === zipLevel)?.emoji} 
+                {zipLevel === 1 && " Very Unsatisfying"}
+                {zipLevel === 2 && " Somewhat Unsatisfying"}
+                {zipLevel === 3 && " Neutral"}
+                {zipLevel === 4 && " Satisfying"}
+                {zipLevel === 5 && " Extremely Satisfying"}
+              </p>
+            </motion.div>
           )}
         </div>
 
-        {/* Complete Button */}
-        {zipLevel > 0 && (
-          <Button
-            onClick={handleComplete}
-            className="px-8 py-3 rounded-xl font-medium bg-vibe-glow-orange hover:bg-vibe-glow-orange/90 text-white shadow-lg transition-all duration-300"
-          >
-            Complete Assessment
-          </Button>
-        )}
-
-        {/* Navigation Arrow - bigger and more visible */}
-        <Button
-          onClick={handlePrev}
-          variant="ghost"
-          size="icon"
-          className="absolute left-8 top-1/2 transform -translate-y-1/2 text-vibe-soft-orange hover:text-vibe-glow-orange w-16 h-16 rounded-full bg-vibe-soft-orange/20 hover:bg-vibe-soft-orange/30"
-        >
-          <ChevronLeft className="h-12 w-12" />
-        </Button>
+        <div className="mt-8 text-center text-muted-foreground">
+          <p className="font-cursive">Drag the zip to rate your satisfaction</p>
+        </div>
       </div>
 
+      {/* Navigation Arrows - Bigger and more visible */}
+      <motion.button
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        onClick={goToPrevPage}
+        className="fixed left-6 top-1/2 transform -translate-y-1/2 z-20 p-6 glass rounded-full hover:bg-accent/20 transition-colors shadow-xl"
+      >
+        <ChevronLeft className="w-10 h-10 text-foreground" />
+      </motion.button>
+
+      {zipLevel > 0 && (
+        <motion.button
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={goToNextPage}
+          className="fixed right-6 top-1/2 transform -translate-y-1/2 z-20 p-6 glass rounded-full hover:bg-accent/20 transition-colors shadow-xl"
+        >
+          <ChevronRight className="w-10 h-10 text-foreground" />
+        </motion.button>
+      )}
     </div>
   );
 };
 
-export default Satisfaction;
+export default SatisfactionPage;
